@@ -1,7 +1,7 @@
 use serde::Deserialize;
 
 #[derive(Deserialize)]
-struct CreateTaskRequest {
+pub struct CreateTaskRequest {
     title: String,
     description: Option<String>,
 }

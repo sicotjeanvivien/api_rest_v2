@@ -1,3 +1,4 @@
+#[derive(Clone)]
 pub struct Task {
     id: u32,
     title: String,
@@ -30,4 +31,31 @@ impl Task {
     pub fn done(&self) -> bool {
         self.done
     }
+
+    pub fn set_title(&mut self, title: String) -> &Self {
+        self.title = title;
+        self
+    }
+
+    pub fn set_description(&mut self, description: Option<String>) -> &Self {
+        self.description = description;
+        self
+    }
+
+    pub fn set_done(&mut self, done: bool) -> &Self {
+        self.done = done;
+        self
+    }
+}
+
+pub struct NewTask {
+    pub title: String,
+    pub description: Option<String>,
+}
+
+pub struct UpdateTask {
+    pub id: u32,
+    pub title: Option<String>,
+    pub description: Option<String>,
+    pub done: Option<bool>,
 }

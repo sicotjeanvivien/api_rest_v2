@@ -19,23 +19,28 @@ L'objectif est de produire un code propre, testé, et prêt pour une connexion �
 Recréer le projet from scratch avec une structure de modules claire :
 
 ```
-src/
-├── main.rs
-├── http/
-│   ├── mod.rs
-│   ├── request.rs       # parsing des requêtes HTTP
-│   └── response.rs      # sérialisation des réponses HTTP
-├── router/
-│   └── mod.rs           # routing avec closures
-├── handlers/
-│   ├── mod.rs
-│   └── tasks.rs         # logique des endpoints
-├── models/
-│   └── task.rs          # struct Task
-├── repository/
-│   └── task_repository.rs  # accès aux données (en mémoire puis BDD)
-└── errors/
-    └── mod.rs           # types d'erreurs custom
+└── 📁src
+    └── 📁domain
+        └── 📁task
+            ├── mod.rs
+            ├── model.rs
+            ├── repository.rs
+            ├── service.rs
+        ├── mod.rs
+    └── 📁errors
+        ├── mod.rs
+    └── 📁infra
+        └── 📁http
+            └── 📁handlers
+                ├── mod.rs
+                ├── task_handler.rs
+            ├── mod.rs
+            ├── request.rs
+            ├── response.rs
+        └── 📁router
+            ├── mod.rs
+        ├── mod.rs
+    └── main.rs
 ```
 
 **Contraintes :**

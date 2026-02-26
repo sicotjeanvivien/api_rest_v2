@@ -84,3 +84,22 @@ impl TaskRepository for InMemoryTaskStore {
         Ok(())
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::domain::task::model::NewTask;
+
+    #[test]
+    fn test_create_and_get_all() {
+        let store = InMemoryTaskStore::new();
+        let new_task = NewTask {
+            title: String::from("Apprendre Rust"),
+            description: None,
+        };
+        store.create(new_task).unwrap();
+        let tasks = store.get_all().unwrap();
+        assert_eq!(tasks.len(), 1);
+        assert_eq!(tasks[0].title(), "Apprendre Rust");
+    }
+}

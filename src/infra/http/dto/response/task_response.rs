@@ -2,7 +2,7 @@ use crate::domain::task::model::Task;
 use serde::Serialize;
 
 #[derive(Serialize)]
-struct TaskResponse {
+pub struct TaskResponse {
     id: u32,
     title: String,
     description: Option<String>,

@@ -22,6 +22,7 @@ impl InMemoryTaskStore {
         let tasks = self.tasks.lock().map_err(|_| RepositoryError::Internal)?;
         Ok(tasks)
     }
+
     fn get_task(&self, id: u32) -> Result<Task, RepositoryError> {
         let tasks = self.lock_tasks()?;
         tasks
@@ -29,13 +30,6 @@ impl InMemoryTaskStore {
             .find(|t| t.id() == id)
             .cloned()
             .ok_or(RepositoryError::NotFound)
-    }
-    fn get_task_index(&self, id: u32) -> Result<usize, RepositoryError> {
-        let tasks = self.lock_tasks()?;
-        match tasks.iter().position(|task| task.id() == id) {
-            Some(i) => Ok(i),
-            None => Err(RepositoryError::NotFound),
-        }
     }
 }
 
@@ -56,6 +50,7 @@ impl TaskRepository for InMemoryTaskStore {
         tasks.push(task);
         Ok(())
     }
+
     fn delete(&self, id: u32) -> Result<(), RepositoryError> {
         let mut tasks = self.lock_tasks()?;
         let index = tasks
@@ -92,14 +87,89 @@ mod tests {
 
     #[test]
     fn test_create_and_get_all() {
+        let store = build_store();
+        let tasks = store.get_all().unwrap();
+        assert_eq!(tasks.len(), 2);
+        assert_eq!(tasks[0].title(), "test create task 0");
+    }
+
+    #[test]
+    fn test_create() {
         let store = InMemoryTaskStore::new();
         let new_task = NewTask {
-            title: String::from("Apprendre Rust"),
-            description: None,
+            title: String::from("test create task"),
+            description: Some(String::from("description")),
         };
         store.create(new_task).unwrap();
+        assert_eq!(store.tasks.lock().iter().len(), 1);
+    }
+
+    #[test]
+    fn test_get_all() {
+        let store = build_store();
         let tasks = store.get_all().unwrap();
-        assert_eq!(tasks.len(), 1);
-        assert_eq!(tasks[0].title(), "Apprendre Rust");
+
+        assert_eq!(tasks.len(), 2);
+        assert_eq!(tasks[0].title(), "test create task 0");
+        assert_eq!(tasks[0].description().unwrap(), "description");
+        assert_eq!(tasks[1].title(), "test create task 1");
+        assert_eq!(tasks[1].description(), None);
+    }
+
+    #[test]
+    fn test_get() {
+        let store = build_store();
+
+        assert_eq!(store.get(1).unwrap().title(), "test create task 1");
+        assert_eq!(store.get(34).unwrap_err(), RepositoryError::NotFound);
+    }
+
+    #[test]
+    fn test_delete() {
+        let store = build_store();
+
+        assert_eq!(store.delete(1).unwrap(), ());
+        assert_eq!(store.get(1).unwrap_err(), RepositoryError::NotFound);
+        assert_eq!(store.delete(34).unwrap_err(), RepositoryError::NotFound);
+    }
+
+    #[test]
+    fn test_update() {
+        let store = build_store();
+        let upade_task = UpdateTask {
+            id: 1,
+            title: Some(String::from("update task 1")),
+            description: None,
+            done: Some(true),
+        };
+        let update_task_bad_id = UpdateTask {
+            id: 34,
+            title: None,
+            description: None,
+            done: Some(true),
+        };
+        assert_eq!(store.update(upade_task).unwrap(), ());
+        assert_eq!(
+            store.update(update_task_bad_id).unwrap_err(),
+            RepositoryError::NotFound
+        );
+        let task = store.get(1).unwrap();
+        assert_eq!(task.title(), "update task 1");
+        assert_eq!(task.done(), true);
+    }
+
+    fn build_store() -> InMemoryTaskStore {
+        let store = InMemoryTaskStore::new();
+        let new_task_1 = NewTask {
+            title: String::from("test create task 0"),
+            description: Some(String::from("description")),
+        };
+        let new_task_2 = NewTask {
+            title: String::from("test create task 1"),
+            description: None,
+        };
+        store.create(new_task_1).unwrap();
+        store.create(new_task_2).unwrap();
+        store
     }
 }

@@ -1,8 +1,11 @@
 pub mod route;
+mod macros;
 
 use crate::infra::{
     http::{
-        handlers::error_handler::ErrorHandler, request::{self, HttpMethod, HttpRequest}, response::HttpResponse
+        handlers::error_handler::ErrorHandler,
+        request::{self, HttpMethod, HttpRequest},
+        response::HttpResponse,
     },
     router::route::Route,
 };

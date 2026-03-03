@@ -34,4 +34,8 @@ impl TaskHandler {
 
         HttpResponse::new(StatusCode::OK, HashMap::new(), Some(body))
     }
+
+    pub fn create_task(&self, _request: HttpRequest)-> HttpResponse {
+        HttpResponse::new(StatusCode::Created, HashMap::new(), None)
+    }
 }

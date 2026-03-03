@@ -17,7 +17,7 @@ use crate::{
             request::{HttpMethod, HttpRequest},
             response::{HttpResponse, StatusCode},
         },
-        router::{Router, route::Route},
+        router::{self, Router, route::Route},
         stores::in_memory_task_store::InMemoryTaskStore,
     },
 };
@@ -55,13 +55,19 @@ fn handle_connection(mut stream: TcpStream, router: Arc<Router>) -> std::io::Res
     Ok(())
 }
 
+
 fn build_router(handler: Arc<TaskHandler>) -> Arc<Router> {
-    let route: Route = Route::new(
-        HttpMethod::GET,
-        String::from("/tasks"),
-        Box::new(move |request: HttpRequest| handler.get_all_task(request)),
-    );
-    let router = Router::new(vec![]).add_route(route);
+    let router = routes![
+        GET "/tasks" => {
+            let handler = handler.clone();
+            move |req| handler.get_all_task(req)
+        },
+        POST "/task" => {
+            let handler = handler.clone();
+            move |req| handler.create_task(req)
+        },
+    ];
+
     Arc::new(router)
 }
 

@@ -1,3 +1,5 @@
+use std::sync::Arc;
+
 use crate::{
     domain::task::{
         model::{NewTask, Task, UpdateTask},
@@ -7,11 +9,11 @@ use crate::{
 };
 
 pub struct TaskService {
-    repository: Box<dyn TaskRepository>,
+    repository: Arc<dyn TaskRepository + Send + Sync>,
 }
 
 impl TaskService {
-    pub fn new(repository: Box<dyn TaskRepository>) -> Self {
+    pub fn new(repository: Arc<dyn TaskRepository + Send + Sync>) -> Self {
         TaskService { repository }
     }
 

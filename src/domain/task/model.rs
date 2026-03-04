@@ -1,3 +1,5 @@
+use serde::Deserialize;
+
 #[derive(Clone, Debug)]
 pub struct Task {
     id: u32,
@@ -48,11 +50,13 @@ impl Task {
     }
 }
 
+#[derive(Deserialize)]
 pub struct NewTask {
     pub title: String,
     pub description: Option<String>,
 }
 
+#[derive(Deserialize)]
 pub struct UpdateTask {
     pub id: u32,
     pub title: Option<String>,

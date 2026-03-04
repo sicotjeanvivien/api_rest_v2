@@ -1,13 +1,15 @@
-pub mod route;
 mod macros;
+pub mod route;
+
+use std::collections::HashMap;
 
 use crate::infra::{
     http::{
         handlers::error_handler::ErrorHandler,
-        request::{self, HttpMethod, HttpRequest},
+        request::{ HttpMethod, HttpRequest},
         response::HttpResponse,
     },
-    router::route::Route,
+    router::route::{Handler, Route},
 };
 
 pub struct Router {
@@ -28,16 +30,44 @@ impl Router {
         &self,
         method: &HttpMethod,
         path: &str,
-    ) -> Option<&(dyn Fn(HttpRequest) -> HttpResponse + Send + Sync)> {
-        self.routes
-            .iter()
-            .find(|r| r.method == *method && r.path == path)
-            .map(|r| r.handler.as_ref())
+    ) -> Option<(&Handler, HashMap<String, String>)> {
+        for route in self.routes.iter() {
+            if route.method != *method {
+                continue;
+            }
+
+            let path_segments: Vec<&str> = path.split('/').collect();
+            let route_segments: Vec<&str> = route.path.split('/').collect();
+
+            if path_segments.len() != route_segments.len() {
+                continue;
+            }
+
+            let mut params = HashMap::new();
+            let mut matched = true;
+
+            for (route_seg, path_seg) in route_segments.iter().zip(path_segments.iter()) {
+                if route_seg.starts_with(':') {
+                    params.insert(route_seg[1..].to_string(), path_seg.to_string());
+                } else if route_seg != path_seg {
+                    matched = false;
+                    break;
+                }
+            }
+
+            if matched {
+                return Some((&route.handler, params));
+            }
+        }
+        None
     }
 
-    pub fn handler(&self, request: HttpRequest) -> HttpResponse {
+    pub fn handler(&self, mut request: HttpRequest) -> HttpResponse {
         self.find_handler(&request.method, &request.path)
-            .map(|handler| handler(request))
-            .unwrap_or_else(|| ErrorHandler::internal_server_error())
+            .map(|(handler, params)| {
+                request.params.extend(params);
+                handler(request).unwrap_or_else(|err| err)
+            })
+            .unwrap_or_else(|| ErrorHandler::not_found())
     }
 }

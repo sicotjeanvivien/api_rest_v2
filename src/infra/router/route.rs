@@ -2,8 +2,8 @@ use crate::infra::http::{
     request::{HttpMethod, HttpRequest},
     response::HttpResponse,
 };
-
-type Handler = dyn Fn(HttpRequest) -> HttpResponse + Send + Sync + 'static;
+pub type HandlerResult = Result<HttpResponse, HttpResponse>;
+pub type Handler = dyn Fn(HttpRequest) -> HandlerResult + Send + Sync + 'static;
 pub struct Route {
     pub method: HttpMethod,
     pub path: String,

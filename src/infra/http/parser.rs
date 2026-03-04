@@ -14,15 +14,16 @@ pub fn decode_request(stream: &mut TcpStream) -> Result<HttpRequest, HttpError> 
     let mut lines = request_str.lines();
 
     // ---- 1️⃣ Request line ----
-    let request_line = lines.next().unwrap_or("");
-    let mut request_parts = request_line.split_whitespace();
+    let request_line: &str = lines.next().unwrap_or("");
+    let mut request_parts: std::str::SplitWhitespace<'_> = request_line.split_whitespace();
 
-    let method = parse_method(request_parts.next().unwrap_or(""))?;
-    let path = request_parts.next().unwrap_or("");
-    let http_version = request_parts.next().unwrap_or("");
+    let method: HttpMethod = parse_method(request_parts.next().unwrap_or(""))?;
+    let path: &str = request_parts.next().unwrap_or("");
+    let http_version: &str = request_parts.next().unwrap_or("");
+    let params: HashMap<String, String> = HashMap::new();
 
     // ---- 2️⃣ Headers ----
-    let mut headers = HashMap::new();
+    let mut headers: HashMap<String, String> = HashMap::new();
 
     for line in &mut lines {
         if line.is_empty() {
@@ -40,6 +41,7 @@ pub fn decode_request(stream: &mut TcpStream) -> Result<HttpRequest, HttpError> 
     Ok(HttpRequest::new(
             method,
             path.into(),
+            params,
             http_version.into(),
             headers,
             if body.is_empty() { None } else { Some(body) },

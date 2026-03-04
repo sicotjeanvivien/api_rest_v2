@@ -1,6 +1,5 @@
 use std::{
-    collections::HashMap,
-    io::{Read, Write},
+    io::Write,
     net::{TcpListener, TcpStream},
     sync::Arc,
 };
@@ -8,16 +7,8 @@ use std::{
 use crate::{
     domain::task::service::TaskService,
     infra::{
-        http::{
-            handlers::{
-                error_handler::{self, ErrorHandler},
-                task_handler::TaskHandler,
-            },
-            parser::decode_request,
-            request::{HttpMethod, HttpRequest},
-            response::{HttpResponse, StatusCode},
-        },
-        router::{self, Router, route::Route},
+        http::{handlers::task_handler::TaskHandler, parser::decode_request, request::HttpMethod},
+        router::{Router, route::Route},
         stores::in_memory_task_store::InMemoryTaskStore,
     },
 };
@@ -55,17 +46,29 @@ fn handle_connection(mut stream: TcpStream, router: Arc<Router>) -> std::io::Res
     Ok(())
 }
 
-
 fn build_router(handler: Arc<TaskHandler>) -> Arc<Router> {
     let router = routes![
-        GET "/tasks" => {
-            let handler = handler.clone();
-            move |req| handler.get_all_task(req)
-        },
-        POST "/task" => {
-            let handler = handler.clone();
-            move |req| handler.create_task(req)
-        },
+      GET "/tasks/:id" => {
+          let handler = handler.clone();
+          move |req| handler.get_task(req)
+      },
+      GET "/tasks" => {
+          let handler = handler.clone();
+          move |req| handler.get_all_task(req)
+      },
+      POST "/tasks" => {
+          let handler = handler.clone();
+          move |req| handler.create_task(req)
+      },
+      PATCH "/tasks" => {
+        let handler = handler.clone();
+        move |req| handler.update_task(req)
+      },
+      DELETE "/tasks/:id" => {
+        let handler = handler.clone();
+        move |req| handler.delete_task(req)
+      },
+
     ];
 
     Arc::new(router)

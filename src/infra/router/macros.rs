@@ -2,7 +2,6 @@
 macro_rules! routes {
     ( $( $method:ident $path:literal => $handler:expr ),* $(,)? ) => {{
         let mut router = Router::new(vec![]);
-
         $(
             let route = Route::new(
                 HttpMethod::$method,

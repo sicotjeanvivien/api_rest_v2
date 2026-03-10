@@ -1,7 +1,8 @@
-use std::{
-    io::Write,
+use std::sync::Arc;
+
+use tokio::{
+    io::AsyncWriteExt,
     net::{TcpListener, TcpStream},
-    sync::Arc,
 };
 
 use crate::{
@@ -9,7 +10,7 @@ use crate::{
     infra::{
         http::{handlers::task_handler::TaskHandler, parser::decode_request, request::HttpMethod},
         router::{Router, route::Route},
-        stores::in_memory_task_store::InMemoryTaskStore,
+        stores::{in_memory_task_store::InMemoryTaskStore, postgres_task_store::PostgresTaskStore},
     },
 };
 
@@ -17,65 +18,78 @@ mod domain;
 mod errors;
 mod infra;
 
-fn main() {
-    let handler = build_handler();
-    let router = build_router(handler);
-    let tcp_listener: TcpListener = TcpListener::bind("127.0.0.1:8080").unwrap();
-    for stream in tcp_listener.incoming() {
-        println!("new connexion");
-        match stream {
-            Ok(stream) => {
-                let arc_router = Arc::clone(&router);
-                std::thread::spawn(move || {
-                    if let Err(e) = handle_connection(stream, arc_router) {
-                        eprintln!("Connection error: {}", e);
-                    }
-                });
-            }
-            Err(e) => {
-                eprintln!("Échec de la connexion : {}", e);
-            }
-        }
+#[tokio::main]
+async fn main() {
+    dotenvy::dotenv().ok();
+    let handler: Arc<TaskHandler> = build_handler().await;
+    let router: Arc<Router> = build_router(handler);
+    let tcp_listener: TcpListener = TcpListener::bind("127.0.0.1:8080").await.unwrap();
+    loop {
+        let (stream, _addr): (tokio::net::TcpStream, _) = tcp_listener.accept().await.unwrap();
+        let arc_router = Arc::clone(&router);
+        tokio::spawn(async move {
+            let _ = handle_connection(stream, arc_router).await;
+        });
     }
 }
 
-fn handle_connection(mut stream: TcpStream, router: Arc<Router>) -> std::io::Result<()> {
-    let request = decode_request(&mut stream).map_err(|_| std::io::ErrorKind::Other)?;
+async fn handle_connection(mut stream: TcpStream, router: Arc<Router>) -> std::io::Result<()> {
+    let request = decode_request(&mut stream)
+        .await
+        .map_err(|_| std::io::ErrorKind::Other)?;
     let response = router.handler(request);
-    stream.write_all(response.to_string().as_bytes())?;
+
+    stream
+        .write_all(response.await.to_string().as_bytes())
+        .await?;
     Ok(())
 }
 
 fn build_router(handler: Arc<TaskHandler>) -> Arc<Router> {
     let router = routes![
       GET "/tasks/:id" => {
-          let handler = handler.clone();
-          move |req| handler.get_task(req)
+        let handler = handler.clone();
+        move |req| Box::pin({
+            let handler = handler.clone();
+            async move {handler.get_task(req).await}
+          })
       },
       GET "/tasks" => {
-          let handler = handler.clone();
-          move |req| handler.get_all_task(req)
+        let handler = handler.clone();
+        move |req| Box::pin({
+            let handler = handler.clone();
+            async move { handler.get_all_task(req).await }
+          })
       },
       POST "/tasks" => {
-          let handler = handler.clone();
-          move |req| handler.create_task(req)
+        let handler = handler.clone();
+        move |req| Box::pin({
+            let handler = handler.clone();
+            async move {handler.create_task(req).await}
+          })
       },
       PATCH "/tasks" => {
         let handler = handler.clone();
-        move |req| handler.update_task(req)
+        move |req| Box::pin({
+            let handler = handler.clone();
+            async move {handler.update_task(req).await}
+          })
       },
       DELETE "/tasks/:id" => {
         let handler = handler.clone();
-        move |req| handler.delete_task(req)
+        move |req| Box::pin({
+            let handler = handler.clone();
+            async move {handler.delete_task(req).await}
+          })
       },
-
     ];
 
     Arc::new(router)
 }
 
-fn build_handler() -> Arc<TaskHandler> {
-    let repository = Arc::new(InMemoryTaskStore::new());
-    let service = TaskService::new(repository);
+async fn build_handler() -> Arc<TaskHandler> {
+    // let repository = Arc::new(InMemoryTaskStore::new());
+    let repository = Arc::new(PostgresTaskStore::new().await);
+    let service = TaskService::new(repository).await;
     Arc::new(TaskHandler::new(service))
 }

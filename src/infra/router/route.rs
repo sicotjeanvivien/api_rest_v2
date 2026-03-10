@@ -1,9 +1,16 @@
+use std::future::Future;
+use std::pin::Pin;
+
 use crate::infra::http::{
     request::{HttpMethod, HttpRequest},
     response::HttpResponse,
 };
+
 pub type HandlerResult = Result<HttpResponse, HttpResponse>;
-pub type Handler = dyn Fn(HttpRequest) -> HandlerResult + Send + Sync + 'static;
+pub type Handler = dyn Fn(HttpRequest) -> Pin<Box<dyn Future<Output = HandlerResult> + Send>>
+    + Send
+    + Sync
+    + 'static;
 pub struct Route {
     pub method: HttpMethod,
     pub path: String,

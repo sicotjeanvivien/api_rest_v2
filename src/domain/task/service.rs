@@ -13,27 +13,27 @@ pub struct TaskService {
 }
 
 impl TaskService {
-    pub fn new(repository: Arc<dyn TaskRepository + Send + Sync>) -> Self {
+    pub async fn new(repository: Arc<dyn TaskRepository + Send + Sync>) -> Self {
         TaskService { repository }
     }
 
-    pub fn get(&self, id: u32) -> Result<Task, RepositoryError> {
-        self.repository.get(id)
+    pub async fn get(&self, id: i32) -> Result<Task, RepositoryError> {
+        self.repository.get(id).await
     }
 
-    pub fn get_all(&self) -> Result<Vec<Task>, RepositoryError> {
-        self.repository.get_all()
+    pub async fn get_all(&self) -> Result<Vec<Task>, RepositoryError> {
+        self.repository.get_all().await
     }
 
-    pub fn create(&self, new_task: NewTask) -> Result<(), RepositoryError> {
-        self.repository.create(new_task)
+    pub async fn create(&self, new_task: NewTask) -> Result<(), RepositoryError> {
+        self.repository.create(new_task).await
     }
 
-    pub fn update(&self, update_task: UpdateTask) -> Result<(), RepositoryError> {
-        self.repository.update(update_task)
+    pub async fn update(&self, update_task: UpdateTask) -> Result<(), RepositoryError> {
+        self.repository.update(update_task).await
     }
 
-    pub fn delete(&self, id: u32) -> Result<(), RepositoryError> {
-        self.repository.delete(id)
+    pub async fn delete(&self, id: i32) -> Result<(), RepositoryError> {
+        self.repository.delete(id).await
     }
 }

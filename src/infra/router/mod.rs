@@ -6,7 +6,7 @@ use std::collections::HashMap;
 use crate::infra::{
     http::{
         handlers::error_handler::ErrorHandler,
-        request::{ HttpMethod, HttpRequest},
+        request::{HttpMethod, HttpRequest},
         response::HttpResponse,
     },
     router::route::{Handler, Route},
@@ -62,12 +62,13 @@ impl Router {
         None
     }
 
-    pub fn handler(&self, mut request: HttpRequest) -> HttpResponse {
-        self.find_handler(&request.method, &request.path)
-            .map(|(handler, params)| {
+    pub async fn handler(&self, mut request: HttpRequest) -> HttpResponse {
+        match self.find_handler(&request.method, &request.path) {
+            Some((handler, params)) => {
                 request.params.extend(params);
-                handler(request).unwrap_or_else(|err| err)
-            })
-            .unwrap_or_else(|| ErrorHandler::not_found())
+                handler(request).await.unwrap_or_else(|err| err)
+            }
+            None => ErrorHandler::not_found(),
+        }
     }
 }

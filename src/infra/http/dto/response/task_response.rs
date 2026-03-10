@@ -3,7 +3,7 @@ use serde::Serialize;
 
 #[derive(Serialize)]
 pub struct TaskResponse {
-    id: u32,
+    id: i32,
     title: String,
     description: Option<String>,
     done: bool,

@@ -2,23 +2,23 @@ use serde::Deserialize;
 
 #[derive(Clone, Debug)]
 pub struct Task {
-    id: u32,
-    title: String,
-    description: Option<String>,
-    done: bool,
+    pub id: i32,
+    pub title: String,
+    pub description: Option<String>,
+    pub done: bool,
 }
 
 impl Task {
-    pub fn new(id: u32, title: String, description: Option<String>) -> Self {
+    pub fn new(id: i32, title: String, description: Option<String>, done: bool) -> Self {
         Task {
             id,
             title,
             description,
-            done: false,
+            done
         }
     }
 
-    pub fn id(&self) -> u32 {
+    pub fn id(&self) -> i32 {
         self.id
     }
 
@@ -58,7 +58,7 @@ pub struct NewTask {
 
 #[derive(Deserialize)]
 pub struct UpdateTask {
-    pub id: u32,
+    pub id: i32,
     pub title: Option<String>,
     pub description: Option<String>,
     pub done: Option<bool>,

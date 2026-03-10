@@ -1,3 +1,5 @@
+use async_trait::async_trait;
+
 use crate::{
     domain::task::{
         model::{NewTask, Task, UpdateTask},
@@ -7,19 +9,19 @@ use crate::{
 };
 use std::sync::{
     Arc, Mutex, MutexGuard,
-    atomic::{AtomicU32, Ordering},
+    atomic::{AtomicI32, Ordering},
 };
 
 pub struct InMemoryTaskStore {
     tasks: Arc<Mutex<Vec<Task>>>,
-    next_id: AtomicU32,
+    next_id: AtomicI32,
 }
 
 impl InMemoryTaskStore {
     pub fn new() -> Self {
         Self {
             tasks: Arc::new(Mutex::new(vec![])),
-            next_id: AtomicU32::new(1),
+            next_id: AtomicI32::new(1),
         }
     }
 
@@ -27,7 +29,7 @@ impl InMemoryTaskStore {
         self.tasks.lock().map_err(|_| RepositoryError::Internal)
     }
 
-    fn get_task(&self, id: u32) -> Result<Task, RepositoryError> {
+    fn get_task(&self, id: i32) -> Result<Task, RepositoryError> {
         let tasks = self.lock_tasks()?;
         tasks
             .iter()
@@ -37,26 +39,27 @@ impl InMemoryTaskStore {
     }
 }
 
+#[async_trait]
 impl TaskRepository for InMemoryTaskStore {
-    fn get(&self, id: u32) -> Result<Task, RepositoryError> {
+    async fn get(&self, id: i32) -> Result<Task, RepositoryError> {
         self.get_task(id)
     }
 
-    fn get_all(&self) -> Result<Vec<Task>, RepositoryError> {
+    async fn get_all(&self) -> Result<Vec<Task>, RepositoryError> {
         let tasks = self.lock_tasks()?;
         Ok(tasks.clone())
     }
 
-    fn create(&self, new_task: NewTask) -> Result<(), RepositoryError> {
+    async fn create(&self, new_task: NewTask) -> Result<(), RepositoryError> {
         println!("create");
         let mut tasks: MutexGuard<'_, Vec<Task>> = self.lock_tasks()?;
-        let id: u32 = self.next_id.fetch_add(1, Ordering::SeqCst);
-        let task: Task = Task::new(id, new_task.title, new_task.description);
+        let id: i32 = self.next_id.fetch_add(1, Ordering::SeqCst);
+        let task: Task = Task::new(id, new_task.title, new_task.description, false);
         tasks.push(task);
         Ok(())
     }
 
-    fn delete(&self, id: u32) -> Result<(), RepositoryError> {
+    async fn delete(&self, id: i32) -> Result<(), RepositoryError> {
         let mut tasks = self.lock_tasks()?;
         let index = tasks
             .iter()
@@ -66,7 +69,7 @@ impl TaskRepository for InMemoryTaskStore {
         Ok(())
     }
 
-    fn update(&self, update_task: UpdateTask) -> Result<(), RepositoryError> {
+    async fn update(&self, update_task: UpdateTask) -> Result<(), RepositoryError> {
         let mut tasks = self.lock_tasks()?;
         let task = tasks
             .iter_mut()

@@ -1,13 +1,15 @@
-use std::{collections::HashMap, io::Read, net::TcpStream};
+use std::collections::HashMap;
+
+use tokio::{io::AsyncReadExt, net::TcpStream};
 
 use crate::infra::http::{
     error::HttpError,
     request::{HttpMethod, HttpRequest},
 };
 
-pub fn decode_request(stream: &mut TcpStream) -> Result<HttpRequest, HttpError> {
+pub async fn decode_request(stream: &mut TcpStream) -> Result<HttpRequest, HttpError> {
     let mut buffer = [0; 2048];
-    let bytes_read = stream.read(&mut buffer).unwrap();
+    let bytes_read = stream.read(&mut buffer).await.unwrap();
 
     let request_str = String::from_utf8_lossy(&buffer[..bytes_read]);
 
@@ -39,13 +41,13 @@ pub fn decode_request(stream: &mut TcpStream) -> Result<HttpRequest, HttpError> 
     let body: String = lines.collect::<Vec<&str>>().join("\n");
 
     Ok(HttpRequest::new(
-            method,
-            path.into(),
-            params,
-            http_version.into(),
-            headers,
-            if body.is_empty() { None } else { Some(body) },
-        ))
+        method,
+        path.into(),
+        params,
+        http_version.into(),
+        headers,
+        if body.is_empty() { None } else { Some(body) },
+    ))
 }
 
 fn parse_method(request_method: &str) -> Result<HttpMethod, HttpError> {

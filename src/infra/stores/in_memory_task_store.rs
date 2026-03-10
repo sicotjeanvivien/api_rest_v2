@@ -5,22 +5,26 @@ use crate::{
     },
     errors::repository_error::RepositoryError,
 };
-use std::sync::{Arc, Mutex, MutexGuard};
+use std::sync::{
+    Arc, Mutex, MutexGuard,
+    atomic::{AtomicU32, Ordering},
+};
 
 pub struct InMemoryTaskStore {
     tasks: Arc<Mutex<Vec<Task>>>,
+    next_id: AtomicU32,
 }
 
 impl InMemoryTaskStore {
     pub fn new() -> Self {
-        InMemoryTaskStore {
+        Self {
             tasks: Arc::new(Mutex::new(vec![])),
+            next_id: AtomicU32::new(1),
         }
     }
 
     fn lock_tasks(&self) -> Result<MutexGuard<'_, Vec<Task>>, RepositoryError> {
-        let tasks = self.tasks.lock().map_err(|_| RepositoryError::Internal)?;
-        Ok(tasks)
+        self.tasks.lock().map_err(|_| RepositoryError::Internal)
     }
 
     fn get_task(&self, id: u32) -> Result<Task, RepositoryError> {
@@ -44,9 +48,10 @@ impl TaskRepository for InMemoryTaskStore {
     }
 
     fn create(&self, new_task: NewTask) -> Result<(), RepositoryError> {
-        let mut tasks = self.lock_tasks()?;
-        let id = tasks.len() as u32;
-        let task = Task::new(id, new_task.title, new_task.description);
+        println!("create");
+        let mut tasks: MutexGuard<'_, Vec<Task>> = self.lock_tasks()?;
+        let id: u32 = self.next_id.fetch_add(1, Ordering::SeqCst);
+        let task: Task = Task::new(id, new_task.title, new_task.description);
         tasks.push(task);
         Ok(())
     }
@@ -101,7 +106,7 @@ mod tests {
             description: Some(String::from("description")),
         };
         store.create(new_task).unwrap();
-        assert_eq!(store.tasks.lock().iter().len(), 1);
+        assert_eq!(store.get_all().unwrap().len(), 1);
     }
 
     #[test]

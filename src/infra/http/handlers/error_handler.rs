@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use crate::infra::http::response::{HttpResponse, StatusCode};
+use crate::infra::http::response::{HttpResponse, status_code::StatusCode};
 
 pub struct ErrorHandler {}
 

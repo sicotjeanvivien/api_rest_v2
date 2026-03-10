@@ -10,7 +10,7 @@ use crate::{
         dto::response::task_response::TaskResponse,
         handlers::error_handler::ErrorHandler,
         request::HttpRequest,
-        response::{HttpResponse, StatusCode},
+        response::{HttpResponse, status_code::StatusCode},
     },
 };
 

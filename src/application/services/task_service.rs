@@ -1,12 +1,9 @@
 use std::sync::Arc;
 
-use crate::{
-    domain::task::{
+use crate::domain::{error::repository_error::RepositoryError, task::{
         model::{NewTask, Task, UpdateTask},
         repository::TaskRepository,
-    },
-    errors::repository_error::RepositoryError,
-};
+    }};
 
 pub struct TaskService {
     repository: Arc<dyn TaskRepository + Send + Sync>,

@@ -1,14 +1,12 @@
-mod macros;
 pub mod route;
+pub mod macros;
 
 use std::collections::HashMap;
 
-use crate::infra::{
-    http::{
-        handlers::error_handler::ErrorHandler,
-        request::{HttpMethod, HttpRequest},
-        response::HttpResponse,
-    },
+use crate::interface::http::{
+    handlers::error_handler::ErrorHandler,
+    request::{HttpMethod, HttpRequest},
+    response::http_response::HttpResponse,
     router::route::{Handler, Route},
 };
 

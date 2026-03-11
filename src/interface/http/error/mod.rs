@@ -1,8 +1,8 @@
 use serde::Serialize;
 
-use crate::infra::{
-    error::into_http_response::IntoHttpResponse,
-    http::{handlers::error_handler::ErrorHandler, response::HttpResponse},
+use crate::interface::http::{
+    handlers::error_handler::ErrorHandler,
+    response::{http_response::HttpResponse, into_http_response::IntoHttpResponse},
 };
 
 #[derive(Serialize)]
@@ -29,7 +29,7 @@ impl IntoHttpResponse for HttpError {
             HttpError::BadRequest(msg) => ErrorHandler::bad_request(&msg),
             HttpError::MethodNotFound(msg) => ErrorHandler::method_not_found(&msg),
             HttpError::ParamNotFound(msg) => ErrorHandler::bad_request(&msg),
-            HttpError::InternalServerError(msg) => ErrorHandler::internal_server_error(&msg)
+            HttpError::InternalServerError(msg) => ErrorHandler::internal_server_error(&msg),
         }
     }
 }

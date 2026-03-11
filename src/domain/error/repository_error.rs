@@ -1,4 +1,4 @@
-use crate::infra::{error::into_http_response::IntoHttpResponse, http::response::HttpResponse};
+use crate::interface::http::response::{http_response::HttpResponse, into_http_response::IntoHttpResponse};
 
 #[derive(Debug, thiserror::Error, PartialEq)]
 pub enum RepositoryError {

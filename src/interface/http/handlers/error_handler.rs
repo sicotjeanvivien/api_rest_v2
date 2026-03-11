@@ -1,9 +1,9 @@
 use std::collections::HashMap;
 
-use crate::infra::http::{
+use crate::interface::http::{
     error::{ApiError, HttpError},
     response::{
-        HttpResponse,
+        http_response::HttpResponse,
         status_code::{self, StatusCode},
     },
 };

@@ -1,13 +1,10 @@
 use async_trait::async_trait;
 use sqlx::PgPool;
 
-use crate::{
-    domain::task::{
+use crate::domain::{error::repository_error::RepositoryError, task::{
         model::{NewTask, Task, UpdateTask},
         repository::TaskRepository,
-    },
-    errors::repository_error::RepositoryError,
-};
+    }};
 
 pub struct PostgresTaskStore {
     pg_pool: PgPool,

@@ -1,8 +1,5 @@
+use crate::interface::http::response::status_code::StatusCode;
 use std::collections::HashMap;
-
-use crate::infra::http::response::status_code::StatusCode;
-
-pub mod status_code;
 
 pub struct HttpResponse {
     status_code: StatusCode,

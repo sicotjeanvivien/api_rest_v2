@@ -1,18 +1,13 @@
 use std::collections::HashMap;
 
 use crate::{
-    domain::task::{
-        model::{NewTask, UpdateTask},
-        service::TaskService,
-    },
-    infra::{
-        error::into_http_response::IntoHttpResponse,
-        http::{
-            dto::response::task_response::TaskResponse,
-            error::HttpError,
-            request::HttpRequest,
-            response::{HttpResponse, status_code::StatusCode},
-        },
+    application::services::task_service::TaskService,
+    domain::task::model::{NewTask, UpdateTask},
+    interface::http::{
+        dto::response::task_response::TaskResponse,
+        error::HttpError,
+        request::HttpRequest,
+        response::{http_response::HttpResponse, into_http_response::IntoHttpResponse, status_code::StatusCode},
     },
 };
 
@@ -21,8 +16,6 @@ pub struct TaskHandler {
 }
 
 impl TaskHandler {
-    // const HEADERS_PARAMS: Vec<()> = vec![()];
-
     pub fn new(task_service: TaskService) -> Self {
         Self { task_service }
     }

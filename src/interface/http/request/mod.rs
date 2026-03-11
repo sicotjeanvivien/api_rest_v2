@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use crate::infra::http::error::HttpError;
+use crate::interface::http::error::HttpError;
 
 #[derive(Debug)]
 pub struct HttpRequest {

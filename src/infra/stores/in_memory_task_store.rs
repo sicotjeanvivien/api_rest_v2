@@ -1,12 +1,9 @@
 use async_trait::async_trait;
 
-use crate::{
-    domain::task::{
+use crate::domain::{error::repository_error::RepositoryError, task::{
         model::{NewTask, Task, UpdateTask},
         repository::TaskRepository,
-    },
-    errors::repository_error::RepositoryError,
-};
+    }};
 use std::sync::{
     Arc, Mutex, MutexGuard,
     atomic::{AtomicI32, Ordering},

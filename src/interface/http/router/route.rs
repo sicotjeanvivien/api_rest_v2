@@ -1,9 +1,9 @@
 use std::future::Future;
 use std::pin::Pin;
 
-use crate::infra::http::{
+use crate::interface::http::{
     request::{HttpMethod, HttpRequest},
-    response::HttpResponse,
+    response::http_response::HttpResponse,
 };
 
 pub type HandlerResult = Result<HttpResponse, HttpResponse>;

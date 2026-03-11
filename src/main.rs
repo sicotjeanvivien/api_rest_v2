@@ -6,20 +6,17 @@ use tokio::{
 };
 
 use crate::{
-    domain::task::service::TaskService,
-    infra::{
-        error::into_http_response::IntoHttpResponse, http::{
-            error::HttpError,
-            handlers::task_handler::TaskHandler,
-            parser::decode_request,
-            request::{HttpMethod, HttpRequest}, response::HttpResponse,
-        }, router::{Router, route::Route}, stores::{in_memory_task_store::InMemoryTaskStore, postgres_task_store::PostgresTaskStore}
+    application::services::task_service::TaskService,
+    infra::stores::postgres_task_store::PostgresTaskStore,
+    interface::http::{
+        handlers::task_handler::TaskHandler, parser::decode_request, request::HttpMethod, response::{http_response::HttpResponse, into_http_response::IntoHttpResponse}, router::{Router, route::Route}
     },
 };
 
+mod application;
 mod domain;
-mod errors;
 mod infra;
+mod interface;
 
 #[tokio::main]
 async fn main() {
@@ -39,7 +36,7 @@ async fn main() {
 async fn handle_connection(mut stream: TcpStream, router: Arc<Router>) {
     let response: HttpResponse = match decode_request(&mut stream).await {
         Ok(request) => router.handler(request).await,
-        Err(e) => e.into_http_response(), 
+        Err(e) => e.into_http_response(),
     };
     stream.write_all(response.to_string().as_bytes()).await.ok();
 }

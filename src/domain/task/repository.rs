@@ -1,6 +1,6 @@
-use crate::{
-    domain::task::model::{NewTask, Task, UpdateTask},
-    errors::repository_error::RepositoryError,
+use crate::domain::{
+    error::repository_error::RepositoryError,
+    task::model::{NewTask, Task, UpdateTask},
 };
 use async_trait::async_trait;
 

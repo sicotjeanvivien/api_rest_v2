@@ -29,7 +29,7 @@ pub async fn decode_request(stream: &mut TcpStream) -> Result<HttpRequest, HttpE
 
     for line in &mut lines {
         if line.is_empty() {
-            break; // fin des headers
+            break;
         }
 
         if let Some((key, value)) = line.split_once(":") {
@@ -61,6 +61,6 @@ fn parse_method(request_method: &str) -> Result<HttpMethod, HttpError> {
         "CONNECT" => Ok(HttpMethod::CONNECT),
         "OPTIONS" => Ok(HttpMethod::OPTIONS),
         "TRACE" => Ok(HttpMethod::TRACE),
-        _ => Err(HttpError::HttpMethodNotFound),
+        e => Err(HttpError::MethodNotFound(e.to_string())),
     }
 }

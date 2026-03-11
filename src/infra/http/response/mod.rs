@@ -46,7 +46,7 @@ impl HttpResponse {
     fn generate_headers(&self, response: &mut String, body_len: usize) {
         self.headers
             .iter()
-            .for_each(|h| response.push_str(&format!("{}:{}\r\n", h.0, h.1)));
+            .for_each(|h| response.push_str(&format!("{}: {}\r\n", h.0, h.1)));
         response.push_str(&format!("Content-Length: {}\r\n", body_len));
         response.push_str("\r\n");
     }

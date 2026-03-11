@@ -26,7 +26,7 @@ impl InMemoryTaskStore {
     }
 
     fn lock_tasks(&self) -> Result<MutexGuard<'_, Vec<Task>>, RepositoryError> {
-        self.tasks.lock().map_err(|_| RepositoryError::Internal)
+        self.tasks.lock().map_err(|e| RepositoryError::Internal(e.to_string()))
     }
 
     fn get_task(&self, id: i32) -> Result<Task, RepositoryError> {
@@ -35,7 +35,7 @@ impl InMemoryTaskStore {
             .iter()
             .find(|t| t.id() == id)
             .cloned()
-            .ok_or(RepositoryError::NotFound)
+            .ok_or(RepositoryError::NotFound("".to_string()))
     }
 }
 
@@ -64,7 +64,7 @@ impl TaskRepository for InMemoryTaskStore {
         let index = tasks
             .iter()
             .position(|t| t.id() == id)
-            .ok_or(RepositoryError::NotFound)?;
+            .ok_or(RepositoryError::NotFound("".to_string()))?;
         tasks.remove(index);
         Ok(())
     }
@@ -74,7 +74,7 @@ impl TaskRepository for InMemoryTaskStore {
         let task = tasks
             .iter_mut()
             .find(|t| t.id() == update_task.id)
-            .ok_or(RepositoryError::NotFound)?;
+            .ok_or(RepositoryError::NotFound("".to_string()))?;
         if let Some(title) = update_task.title {
             task.set_title(title);
         }
@@ -93,29 +93,29 @@ mod tests {
     use super::*;
     use crate::domain::task::model::NewTask;
 
-    #[test]
-    fn test_create_and_get_all() {
-        let store = build_store();
-        let tasks = store.get_all().unwrap();
+    #[tokio::test]
+    async fn test_create_and_get_all() {
+        let store = build_store().await;
+        let tasks = store.get_all().await.unwrap();
         assert_eq!(tasks.len(), 2);
         assert_eq!(tasks[0].title(), "test create task 0");
     }
 
-    #[test]
-    fn test_create() {
+    #[tokio::test]
+    async fn test_create() {
         let store = InMemoryTaskStore::new();
         let new_task = NewTask {
             title: String::from("test create task"),
             description: Some(String::from("description")),
         };
-        store.create(new_task).unwrap();
-        assert_eq!(store.get_all().unwrap().len(), 1);
+        store.create(new_task).await.unwrap();
+        assert_eq!(store.get_all().await.unwrap().len(), 1);
     }
 
-    #[test]
-    fn test_get_all() {
-        let store = build_store();
-        let tasks = store.get_all().unwrap();
+    #[tokio::test]
+    async fn test_get_all() {
+        let store = build_store().await;
+        let tasks = store.get_all().await.unwrap();
 
         assert_eq!(tasks.len(), 2);
         assert_eq!(tasks[0].title(), "test create task 0");
@@ -124,26 +124,29 @@ mod tests {
         assert_eq!(tasks[1].description(), None);
     }
 
-    #[test]
-    fn test_get() {
-        let store = build_store();
+    #[tokio::test]
+    async fn test_get() {
+        let store = build_store().await;
 
-        assert_eq!(store.get(1).unwrap().title(), "test create task 1");
-        assert_eq!(store.get(34).unwrap_err(), RepositoryError::NotFound);
+        assert_eq!(store.get(1).await.unwrap().title(), "test create task 0");
+        assert_eq!(store.get(34).await.unwrap_err(), RepositoryError::NotFound("".to_string()));
     }
 
-    #[test]
-    fn test_delete() {
-        let store = build_store();
+    #[tokio::test]
+    async fn test_delete() {
+        let store = build_store().await;
 
-        assert_eq!(store.delete(1).unwrap(), ());
-        assert_eq!(store.get(1).unwrap_err(), RepositoryError::NotFound);
-        assert_eq!(store.delete(34).unwrap_err(), RepositoryError::NotFound);
+        assert_eq!(store.delete(1).await.unwrap(), ());
+        assert_eq!(store.get(1).await.unwrap_err(), RepositoryError::NotFound("".to_string()));
+        assert_eq!(
+            store.delete(34).await.unwrap_err(),
+            RepositoryError::NotFound("".to_string())
+        );
     }
 
-    #[test]
-    fn test_update() {
-        let store = build_store();
+    #[tokio::test]
+    async fn test_update() {
+        let store = build_store().await;
         let upade_task = UpdateTask {
             id: 1,
             title: Some(String::from("update task 1")),
@@ -156,17 +159,17 @@ mod tests {
             description: None,
             done: Some(true),
         };
-        assert_eq!(store.update(upade_task).unwrap(), ());
+        assert_eq!(store.update(upade_task).await.unwrap(), ());
         assert_eq!(
-            store.update(update_task_bad_id).unwrap_err(),
-            RepositoryError::NotFound
+            store.update(update_task_bad_id).await.unwrap_err(),
+            RepositoryError::NotFound("".to_string())
         );
-        let task = store.get(1).unwrap();
+        let task = store.get(1).await.unwrap();
         assert_eq!(task.title(), "update task 1");
         assert_eq!(task.done(), true);
     }
 
-    fn build_store() -> InMemoryTaskStore {
+    async fn build_store() -> InMemoryTaskStore {
         let store = InMemoryTaskStore::new();
         let new_task_1 = NewTask {
             title: String::from("test create task 0"),
@@ -176,8 +179,8 @@ mod tests {
             title: String::from("test create task 1"),
             description: None,
         };
-        store.create(new_task_1).unwrap();
-        store.create(new_task_2).unwrap();
+        store.create(new_task_1).await.unwrap();
+        store.create(new_task_2).await.unwrap();
         store
     }
 }

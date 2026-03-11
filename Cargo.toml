@@ -11,3 +11,8 @@ tokio = { version = "*", features = ["full"] }
 sqlx = { version = "*", features = ["postgres", "runtime-tokio", "macros"] }
 async-trait = "*"
 dotenvy = "*"
+tracing = "*"
+tracing-subscriber = "*"
+
+[dev-dependencies]
+sqlx = { version = "*", features = ["postgres", "runtime-tokio", "macros", "migrate"] }

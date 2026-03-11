@@ -37,7 +37,7 @@ impl HttpRequest {
                 return Ok(x);
             }
         }
-        Err(HttpError::ParamNotFount)
+        Err(HttpError::ParamNotFound(format!("{} not found in path", key)))
     }
 }
 

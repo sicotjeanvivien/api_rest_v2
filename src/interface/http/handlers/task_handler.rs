@@ -5,7 +5,7 @@ use crate::{
     domain::task::model::{NewTask, UpdateTask},
     interface::http::{
         dto::response::task_response::TaskResponse,
-        error::HttpError,
+        error::http_error::HttpError,
         request::HttpRequest,
         response::{http_response::HttpResponse, into_http_response::IntoHttpResponse, status_code::StatusCode},
     },

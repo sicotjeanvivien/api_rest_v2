@@ -3,7 +3,7 @@ use std::collections::HashMap;
 use tokio::{io::AsyncReadExt, net::TcpStream};
 
 use crate::interface::http::{
-    error::HttpError,
+    error::http_error::HttpError,
     request::{HttpMethod, HttpRequest},
 };
 

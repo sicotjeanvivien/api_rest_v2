@@ -66,7 +66,7 @@ impl Router {
                 request.params.extend(params);
                 handler(request).await.unwrap_or_else(|err| err)
             }
-            None => ErrorHandler::not_found(),
+            None => ErrorHandler::not_found("Page Not Found."),
         }
     }
 }

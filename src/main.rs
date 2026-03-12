@@ -21,9 +21,12 @@ mod interface;
 #[tokio::main]
 async fn main() {
     dotenvy::dotenv().ok();
+    tracing_subscriber::fmt::init();
+
     let handler: Arc<TaskHandler> = build_handler().await;
     let router: Arc<Router> = build_router(handler);
     let tcp_listener: TcpListener = TcpListener::bind("127.0.0.1:8080").await.unwrap();
+    tracing::info!("Server starting on 127.0.0.1:8080");
     loop {
         let (stream, _addr): (tokio::net::TcpStream, _) = tcp_listener.accept().await.unwrap();
         let arc_router = Arc::clone(&router);

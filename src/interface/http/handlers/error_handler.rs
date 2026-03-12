@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
 use crate::interface::http::{
-    error::{ApiError, HttpError},
+    error::{api_error::ApiError, http_error::HttpError},
     response::{
         http_response::HttpResponse,
         status_code::{self, StatusCode},
@@ -20,9 +20,13 @@ impl ErrorHandler {
         )
     }
 
-    pub fn not_found() -> HttpResponse {
-        eprintln!("not_found");
-        HttpResponse::new(StatusCode::NotFound, Self::build_header(), None)
+    pub fn not_found(message: &str) -> HttpResponse {
+        Self::error_in_terminal(StatusCode::NotFound, message);
+        HttpResponse::new(
+            StatusCode::NotFound,
+            Self::build_header(),
+            Self::build_body(StatusCode::NotFound, message),
+        )
     }
 
     pub fn bad_request(message: &str) -> HttpResponse {
@@ -34,9 +38,13 @@ impl ErrorHandler {
         )
     }
 
-    pub fn unprocessable_entity() -> HttpResponse {
-        eprintln!("unprocessable_entity");
-        HttpResponse::new(StatusCode::UnprocessableEntity, Self::build_header(), None)
+    pub fn unprocessable_entity(message: &str) -> HttpResponse {
+        Self::error_in_terminal(StatusCode::UnprocessableEntity, message);
+        HttpResponse::new(
+            StatusCode::UnprocessableEntity,
+            Self::build_header(),
+            Self::build_body(StatusCode::UnprocessableEntity, message),
+        )
     }
 
     pub fn method_not_found(message: &str) -> HttpResponse {
@@ -81,5 +89,6 @@ impl ErrorHandler {
             status_code.to_text(),
             message
         );
+        tracing::error!(code = status_code.to_u16(), message);
     }
 }

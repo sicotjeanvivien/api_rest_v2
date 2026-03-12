@@ -84,8 +84,6 @@ Le projet suit une organisation en couches :
             ├── mod.rs
             ├── parser.rs
         ├── mod.rs
-    └── 📁migrations
-        ├── 20240101000000_create_tasks.sql
     └── main.rs
 ```
 

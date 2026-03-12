@@ -1,6 +1,6 @@
 use async_trait::async_trait;
 use sqlx::PgPool;
-use tracing::{debug, info};
+use tracing::info;
 
 use crate::domain::{
     error::repository_error::RepositoryError,
@@ -118,7 +118,7 @@ mod tests {
     use crate::domain::task::model::NewTask;
     use sqlx::PgPool;
 
-    #[sqlx::test(migrations = "src/migrations")]
+    #[sqlx::test(migrations = "./migrations")]
     async fn test_create(pool: PgPool) {
         let store = PostgresTaskStore::from_pool(pool);
 
@@ -136,7 +136,7 @@ mod tests {
         assert_eq!(tasks[0].description().unwrap(), "description");
     }
 
-    #[sqlx::test(migrations = "src/migrations")]
+    #[sqlx::test(migrations = "./migrations")]
     async fn test_get_all(pool: PgPool) {
         let store = PostgresTaskStore::from_pool(pool);
 
@@ -164,7 +164,7 @@ mod tests {
         assert_eq!(tasks[1].title(), "task 2");
     }
 
-    #[sqlx::test(migrations = "src/migrations")]
+    #[sqlx::test(migrations = "./migrations")]
     async fn test_get(pool: PgPool) {
         let store = PostgresTaskStore::from_pool(pool);
 
@@ -185,7 +185,7 @@ mod tests {
         assert!(matches!(err, RepositoryError::NotFound(_)));
     }
 
-    #[sqlx::test(migrations = "src/migrations")]
+    #[sqlx::test(migrations = "./migrations")]
     async fn test_update(pool: PgPool) {
         let store = PostgresTaskStore::from_pool(pool);
 
@@ -214,7 +214,7 @@ mod tests {
         assert_eq!(task.done(), true);
     }
 
-    #[sqlx::test(migrations = "src/migrations")]
+    #[sqlx::test(migrations = "./migrations")]
     async fn test_delete(pool: PgPool) {
         let store = PostgresTaskStore::from_pool(pool);
 

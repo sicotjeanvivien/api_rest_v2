@@ -1,4 +1,5 @@
 use std::collections::HashMap;
+use tracing::error;
 
 use crate::interface::http::{
     error::{api_error::ApiError, http_error::HttpError},
@@ -12,7 +13,7 @@ pub struct ErrorHandler {}
 
 impl ErrorHandler {
     pub fn internal_server_error(message: &str) -> HttpResponse {
-        Self::error_in_terminal(StatusCode::InternalServerError, message);
+        error!(code = StatusCode::InternalServerError.to_u16(), message);
         HttpResponse::new(
             StatusCode::InternalServerError,
             Self::build_header(),
@@ -21,7 +22,7 @@ impl ErrorHandler {
     }
 
     pub fn not_found(message: &str) -> HttpResponse {
-        Self::error_in_terminal(StatusCode::NotFound, message);
+        error!(code = StatusCode::NotFound.to_u16(), message);
         HttpResponse::new(
             StatusCode::NotFound,
             Self::build_header(),
@@ -30,7 +31,7 @@ impl ErrorHandler {
     }
 
     pub fn bad_request(message: &str) -> HttpResponse {
-        Self::error_in_terminal(StatusCode::BadRequest, message);
+        error!(code = StatusCode::BadRequest.to_u16(), message);
         HttpResponse::new(
             StatusCode::BadRequest,
             Self::build_header(),
@@ -39,7 +40,7 @@ impl ErrorHandler {
     }
 
     pub fn unprocessable_entity(message: &str) -> HttpResponse {
-        Self::error_in_terminal(StatusCode::UnprocessableEntity, message);
+        error!(code = StatusCode::UnprocessableEntity.to_u16(), message);
         HttpResponse::new(
             StatusCode::UnprocessableEntity,
             Self::build_header(),
@@ -48,7 +49,7 @@ impl ErrorHandler {
     }
 
     pub fn method_not_found(message: &str) -> HttpResponse {
-        Self::error_in_terminal(StatusCode::UnprocessableEntity, message);
+        error!(code = StatusCode::UnprocessableEntity.to_u16(), message);
         HttpResponse::new(
             StatusCode::UnprocessableEntity,
             Self::build_header(),
@@ -80,15 +81,5 @@ impl ErrorHandler {
             message: message.to_string(),
         })
         .ok()
-    }
-
-    fn error_in_terminal(status_code: StatusCode, message: &str) {
-        eprintln!(
-            "{} {}: {:?}",
-            status_code.to_u16(),
-            status_code.to_text(),
-            message
-        );
-        tracing::error!(code = status_code.to_u16(), message);
     }
 }

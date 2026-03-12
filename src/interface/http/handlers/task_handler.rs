@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::{collections::HashMap, sync::Arc};
 
 use crate::{
     application::services::task_service::TaskService,
@@ -7,16 +7,19 @@ use crate::{
         dto::response::task_response::TaskResponse,
         error::http_error::HttpError,
         request::HttpRequest,
-        response::{http_response::HttpResponse, into_http_response::IntoHttpResponse, status_code::StatusCode},
+        response::{
+            http_response::HttpResponse, into_http_response::IntoHttpResponse,
+            status_code::StatusCode,
+        },
     },
 };
 
 pub struct TaskHandler {
-    task_service: TaskService,
+    task_service: Arc<TaskService>,
 }
 
 impl TaskHandler {
-    pub fn new(task_service: TaskService) -> Self {
+    pub fn new(task_service: Arc<TaskService>) -> Self {
         Self { task_service }
     }
 

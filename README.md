@@ -1,195 +1,327 @@
-# API REST Rust — V2
+# API REST V2 – Rust
 
-Refactoring complet de l'API REST construite from scratch en Rust.  
-L'objectif est de produire un code propre, testé, et prêt pour une connexion à une base de données.
+API REST moderne développée en **Rust**, avec une architecture inspirée des principes **Clean Architecture / Hexagonal Architecture**.
+Le projet sert de base pour construire des APIs robustes, typées et performantes avec une séparation claire des responsabilités entre le domaine, l'application et l'infrastructure.
+
+L'objectif est de séparer clairement :
+- la **logique métier**
+- les **cas d'usage applicatifs**
+- l'**infrastructure technique**
+- les **interfaces externes (HTTP)**
+Chaque couche dépend uniquement des couches **plus internes**.  
 
 ---
-
-## Objectifs pédagogiques
-
-- Consolider les concepts vus en V1 : ownership, borrowing, enums, structs, traits, closures, Arc/Mutex
-- Introduire les nouveaux concepts : error handling custom, tests, async/await, BDD
+# Objectifs du projet
+- Construire une API REST idiomatique en Rust
+- Appliquer des principes d’architecture propres (Domain Driven Design, Ports & Adapters)
+- Mettre en place une gestion d’erreurs centralisée
+- Structurer un projet backend Rust maintenable et testable
+- Servir de base réutilisable pour d'autres projets API
 
 ---
+# Stack technique
+- **Rust**
+- **Tokio** – Runtime async
+- **SQLx** – Accès base de données
+- **PostgreSQL**
+- **Serde** – Sérialisation JSON
+- **Custom Router / HTTP layer**
+- **Async Trait**
 
-## Plan de développement
-
-### Phase 1 — Architecture propre
-
-Recréer le projet from scratch avec une structure de modules claire :
+---
+# Architecture
+Le projet suit une organisation en couches :
 
 ```
 └── 📁src
-    └── 📁domain
-        └── 📁task
-            ├── mod.rs
-            ├── model.rs
-            ├── repository.rs
-            ├── service.rs
-        ├── mod.rs
-    └── 📁errors
-        ├── mod.rs
-    └── 📁infra
-        └── 📁http
-            └── 📁handlers
-                ├── mod.rs
-                ├── task_handler.rs
-            ├── mod.rs
-            ├── request.rs
-            ├── response.rs
-        └── 📁router
-            ├── mod.rs
-        ├── mod.rs
-    └── main.rs
+    └── 📁application
+        └── 📁services
+            ├── mod.rs
+            ├── task_service.rs
+        ├── mod.rs
+    └── 📁domain
+        └── 📁error
+            ├── mod.rs
+            ├── repository_error.rs
+        └── 📁task
+            ├── mod.rs
+            ├── model.rs
+            ├── repository.rs
+        ├── mod.rs
+    └── 📁infra
+        └── 📁stores
+            ├── in_memory_task_store.rs
+            ├── mod.rs
+            ├── postgres_task_store.rs
+        ├── mod.rs
+    └── 📁interface
+        └── 📁http
+            └── 📁dto
+                └── 📁request
+                    ├── create_task_request.rs
+                    ├── mod.rs
+                └── 📁response
+                    ├── mod.rs
+                    ├── task_response.rs
+                ├── mod.rs
+            └── 📁error
+                ├── mod.rs
+            └── 📁handlers
+                ├── error_handler.rs
+                ├── mod.rs
+                ├── task_handler.rs
+            └── 📁request
+                ├── mod.rs
+            └── 📁response
+                ├── http_response.rs
+                ├── into_http_response.rs
+                ├── mod.rs
+                ├── status_code.rs
+            └── 📁router
+                ├── macros.rs
+                ├── mod.rs
+                ├── route.rs
+            ├── mod.rs
+            ├── parser.rs
+        ├── mod.rs
+    └── 📁migrations
+        ├── 20240101000000_create_tasks.sql
+    └── main.rs
 ```
 
-**Contraintes :**
-- Pas de `unwrap()` en dehors des tests
-- Chaque module a une responsabilité unique
-- Les handlers ne connaissent pas les détails HTTP
+# Description des couches
+## Domain
 
----
+Contient la **logique métier pure**. Cette couche est totalement indépendante du reste du système.
 
-### Phase 2 — Error handling propre
+Elle contient :
+- les **modèles métier**
+- les **interfaces (traits) des repositories**
+- les **erreurs métier**
+  
+Exemple :
+```
+domain/task/model.rs
+domain/task/repository.rs
+````
 
-Créer un type d'erreur custom avec `thiserror` :
+Le `repository.rs` définit uniquement le **contrat** :
 
 ```rust
-#[derive(Debug, thiserror::Error)]
-pub enum AppError {
-    #[error("Route not found")]
-    NotFound,
-    #[error("Bad request: {0}")]
-    BadRequest(String),
-    #[error("Internal server error")]
-    Internal,
+
+pub trait TaskRepository {
+    fn get(&self, id: i32) -> Result<Task, RepositoryError>;
 }
-```
-
-Tous les `unwrap()` doivent être remplacés par une propagation d'erreur propre avec `?`.
-
-**Concepts à maîtriser :**
-- `thiserror` pour définir ses erreurs
-- `anyhow` pour les cas où le type exact n'importe pas
-- Conversion entre types d'erreurs avec `From`
+````
+Aucune implémentation concrète n'est présente dans cette couche.
 
 ---
+## Application
 
-### Phase 3 — Tests unitaires
+Contient les **services applicatifs** qui orchestrent les cas d’usage.
+Les services :
+* utilisent les **repositories du domaine**
+* implémentent la **logique applicative**
 
-Écrire des tests pour les fonctions critiques :
+Exemple :
+```
+application/services/task_service.rs
+```
+Le service agit comme un **point d'entrée métier** pour les handlers HTTP.
 
-```rust
-#[cfg(test)]
-mod tests {
-    use super::*;
+---
+## Infrastructure (infra)
 
-    #[test]
-    fn test_parse_get_request() {
-        // ...
-    }
-
-    #[test]
-    fn test_router_find_existing_route() {
-        // ...
-    }
-
-    #[test]
-    fn test_router_find_missing_route() {
-        // ...
-    }
-}
+Implémente les interfaces définies dans le domaine.
+Exemple :
+```
+infra/stores/postgres_task_store.rs
+infra/stores/in_memory_task_store.rs
 ```
 
-**Fonctions à tester en priorité :**
-- `parse_request` — cas nominaux et cas d'erreur
-- `Router::find` — route existante, route manquante, mauvaise méthode
-- `Task::new` — avec et sans description
+Cela permet de changer l’implémentation sans modifier le domaine :
+* PostgreSQL
+* InMemory (tests)
+* Redis
+* autre backend
 
-**Commandes utiles :**
+---
+## Interface HTTP
+
+Couche responsable de l'exposition de l'API. Elle contient :
+### DTO
+
+Objets utilisés pour l'entrée / sortie HTTP.
+```
+dto/request
+dto/response
+```
+Ils permettent d’éviter d’exposer directement les modèles métier.
+### Handlers
+
+Les handlers reçoivent les requêtes HTTP et appellent les services applicatifs.
+Exemple :
+```
+handlers/task_handler.rs
+```
+
+Flux typique :
+```
+HTTP Request
+   ↓
+Handler
+   ↓
+Service
+   ↓
+Repository
+   ↓
+Database
+```
+### Router
+Le router associe les routes HTTP aux handlers.
+
+```
+router/route.rs
+```
+### Response
+
+Gestion des réponses HTTP :
+
+```
+http_response.rs
+status_code.rs
+into_http_response.rs
+```
+
+Permet de construire des réponses HTTP typées.
+
+---
+# Flux d'une requête
+
+```
+Client HTTP
+     │
+     ▼
+Router
+     │
+     ▼
+Handler
+     │
+     ▼
+Service (Application)
+     │
+     ▼
+Repository Trait (Domain)
+     │
+     ▼
+Repository Implementation (Infra)
+     │
+     ▼
+Database
+```
+
+---
+# Migration base de données
+
+Les migrations SQL sont stockées dans : 
+
+```
+src/migrations
+```
+
+Exemple :
+```
+20240101000000_create_tasks.sql
+```
+
+---
+# Avantages de cette architecture
+
+* séparation claire des responsabilités
+* testabilité élevée
+* infrastructure interchangeable
+* domaine indépendant
+* code maintenable
+* 
+Cette structure permet de faire évoluer le projet sans coupler la logique métier à l'infrastructure.
+
+---
+---
+# Modèle Task
+
+Exemple d'entité exposée par l'API.
+```rust
+pub struct Task {
+    pub id: i32,
+    pub title: String,
+    pub description: Option<String>,
+    pub done: bool,
+}
+````
+
+---
+# Routes API
+
+| Method | Route         | Description                 |
+| ------ | ------------- | --------------------------- |
+| GET    | `/tasks`      | Récupérer toutes les tâches |
+| GET    | `/tasks/{id}` | Récupérer une tâche         |
+| POST   | `/tasks`      | Créer une tâche             |
+| PATCH  | `/tasks/{id}` | Mettre à jour une tâche     |
+| DELETE | `/tasks/{id}` | Supprimer une tâche         |
+
+---
+# Installation
+### Prérequis
+* Rust
+* PostgreSQL
+* Cargo
+---
+# Configuration
+
+Créer un fichier `.env`
+```
+DATABASE_URL=postgres://user:password@localhost:5432/tasks
+```
+
+---
+# Lancer le projet
+
 ```bash
-cargo test                    # lancer tous les tests
-cargo test test_parse         # lancer un test spécifique
-cargo test -- --nocapture     # afficher les println! dans les tests
+cargo run
 ```
 
 ---
+# Lancer les tests
 
-### Phase 4 — Async avec Tokio
-
-Remplacer la concurrence par threads avec `tokio` :
-
-```toml
-[dependencies]
-tokio = { version = "1", features = ["full"] }
-```
-
-```rust
-#[tokio::main]
-async fn main() {
-    let listener = tokio::net::TcpListener::bind("127.0.0.1:8080").await.unwrap();
-    loop {
-        let (stream, _) = listener.accept().await.unwrap();
-        tokio::spawn(async move {
-            handle_connection(stream).await;
-        });
-    }
-}
-```
-
-**Concepts à maîtriser :**
-- `async/await`
-- `tokio::spawn` vs `std::thread::spawn`
-- Pourquoi async est préférable aux threads pour de l'I/O
-
----
-
-### Phase 5 — Base de données avec sqlx
-
-Remplacer le `Vec<Task>` en mémoire par PostgreSQL :
-
-```toml
-[dependencies]
-sqlx = { version = "0.7", features = ["postgres", "runtime-tokio"] }
-```
-
-**Étapes :**
-1. Créer la table `tasks` en SQL
-2. Remplacer le `Arc<Mutex<Vec<Task>>>` par un pool de connexions `sqlx::PgPool`
-3. Écrire les requêtes SQL dans `task_repository.rs`
-4. Gérer les erreurs de BDD dans `AppError`
-
----
-
-## Endpoints cibles
-
-| Méthode | Route | Description |
-|---------|-------|-------------|
-| GET | /tasks | Lister toutes les tâches |
-| POST | /tasks | Créer une tâche |
-| GET | /tasks/:id | Récupérer une tâche |
-| PUT | /tasks/:id | Modifier une tâche |
-| DELETE | /tasks/:id | Supprimer une tâche |
-
----
-
-## Dépendances
-
-```toml
-[dependencies]
-serde = { version = "1", features = ["derive"] }
-serde_json = "1"
-thiserror = "1"
-anyhow = "1"
-tokio = { version = "1", features = ["full"] }
-sqlx = { version = "0.7", features = ["postgres", "runtime-tokio"] }
+```bash
+cargo test
 ```
 
 ---
+# Migration base de données
 
-## Rappels importants
+Si SQLx est utilisé avec migrations :
+```bash
+sqlx migrate run
+```
 
-- Pas de `unwrap()` en dehors des tests — utilise `?` et propage les erreurs
-- Chaque `unwrap()` qui reste est un bug potentiel en production
-- Écris les tests **avant** ou **pendant** le code, pas après
-- Commit régulièrement avec des messages clairs
+---
+# Philosophie du projet
+
+Ce projet met l'accent sur :
+* **séparation claire des responsabilités**
+* **testabilité**
+* **code explicite**
+* **typage fort**
+* **erreurs gérées proprement**
+Rust permet de construire des APIs **fiables et performantes**, tout en conservant une architecture propre comparable aux standards du backend moderne.
+
+---
+# Licence
+
+MIT License
+
+Copyright (c) 2026 Jean-Vivien Sicot
+
+Permission is hereby granted, free of charge, to any person obtaining a copy

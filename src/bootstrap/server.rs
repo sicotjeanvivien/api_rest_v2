@@ -6,7 +6,7 @@ use crate::{
         router::router::Router,
     },
 };
-use std::sync::Arc;
+use std::{env, sync::Arc};
 use tokio::{
     io::AsyncWriteExt,
     net::{TcpListener, TcpStream},
@@ -25,8 +25,9 @@ impl Server {
         
         let container = Container::build().await;
         let router = bootstrap::router::build_router(&container).await;
-        let tcp_listener: TcpListener = TcpListener::bind("127.0.0.1:8080").await.unwrap();
-        info!("Server starting on 127.0.0.1:8080");
+        let app_url = env::var("APP_URL").expect("APP_URL must be set in .env");
+        let tcp_listener: TcpListener = TcpListener::bind(app_url.clone()).await.expect("app_url is invalid ");
+        info!("Server starting on {}", app_url);
         Server {
             router,
             tcp_listener,
@@ -35,7 +36,7 @@ impl Server {
 
     pub async fn run(self) {
         loop {
-            let (stream, _addr): (TcpStream, _) = self.tcp_listener.accept().await.unwrap();
+            let (stream, _addr): (TcpStream, _) = self.tcp_listener.accept().await.expect("couldn't get client");
             let arc_router = Arc::clone(&self.router);
             tokio::spawn(async move {
                 handle_connection(stream, arc_router).await;

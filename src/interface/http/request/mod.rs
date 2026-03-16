@@ -1,6 +1,9 @@
 use std::collections::HashMap;
 
-use crate::interface::http::error::http_error::HttpError;
+use crate::interface::http::{
+    error::http_error::HttpError,
+    response::{http_response::HttpResponse, into_http_response::IntoHttpResponse},
+};
 
 #[derive(Debug)]
 pub struct HttpRequest {
@@ -37,11 +40,20 @@ impl HttpRequest {
                 return Ok(x);
             }
         }
-        Err(HttpError::ParamNotFound(format!("{} not found in path", key)))
+        Err(HttpError::ParamNotFound(format!(
+            "{} not found in path",
+            key
+        )))
+    }
+
+    pub fn get_body(&self) -> Result<String, HttpResponse> {
+        self.body.clone().ok_or_else(|| {
+            HttpError::BadRequest("body is not found".to_string()).into_http_response()
+        })
     }
 }
 
-#[derive(PartialEq,Debug)]
+#[derive(PartialEq, Debug)]
 pub enum HttpMethod {
     GET,
     POST,

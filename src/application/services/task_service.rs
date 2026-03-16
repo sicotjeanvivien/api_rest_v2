@@ -11,7 +11,7 @@ pub struct TaskService {
 
 impl TaskService {
     pub async fn new(repository: Arc<dyn TaskRepository + Send + Sync>) -> Self {
-        TaskService { repository }
+        Self { repository }
     }
 
     pub async fn get(&self, id: i32) -> Result<Task, RepositoryError> {

@@ -57,6 +57,15 @@ impl ErrorHandler {
         )
     }
 
+    pub fn unauthorized(message: &str) -> HttpResponse {
+        error!(code = StatusCode::Unauthorized.to_u16(), message);
+        HttpResponse::new(
+            StatusCode::Unauthorized,
+            Self::build_header(),
+            Self::build_body(StatusCode::Unauthorized, message),
+        )
+    }
+
     fn build_header() -> HashMap<String, String> {
         let mut headers = HashMap::new();
         headers.insert("Content-Type".to_string(), "application/json".to_string());

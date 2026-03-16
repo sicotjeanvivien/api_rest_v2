@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT id, title, description, done FROM tasks",
+  "query": "SELECT id, title, description, done FROM tasks ;",
   "describe": {
     "columns": [
       {
@@ -34,5 +34,5 @@
       false
     ]
   },
-  "hash": "a83b03db8314fe089d06dcae28b4b8ed8b724ab3a095bd574e38dd42badacd40"
+  "hash": "185f594852c764324f914f081063336b42f91811ccde59b1ef9b670d13d53873"
 }

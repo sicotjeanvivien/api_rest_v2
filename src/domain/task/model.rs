@@ -14,7 +14,7 @@ impl Task {
             id,
             title,
             description,
-            done
+            done,
         }
     }
 

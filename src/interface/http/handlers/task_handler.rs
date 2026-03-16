@@ -14,6 +14,7 @@ use crate::{
     },
 };
 
+#[derive(Clone)]
 pub struct TaskHandler {
     task_service: Arc<TaskService>,
 }
@@ -63,11 +64,7 @@ impl TaskHandler {
     }
 
     pub async fn create_task(&self, _request: HttpRequest) -> Result<HttpResponse, HttpResponse> {
-        let body = _request.body.ok_or_else(|| {
-            HttpError::BadRequest("body is not found".to_string()).into_http_response()
-        })?;
-
-        let new_task: NewTask = serde_json::from_str(&body)
+        let new_task: NewTask = serde_json::from_str(&_request.get_body()?)
             .map_err(|e| HttpError::BadRequest(e.to_string()).into_http_response())?;
 
         self.task_service
@@ -83,10 +80,7 @@ impl TaskHandler {
     }
 
     pub async fn update_task(&self, _request: HttpRequest) -> Result<HttpResponse, HttpResponse> {
-        let body = _request.body.ok_or_else(|| {
-            HttpError::BadRequest("body is not found".to_string()).into_http_response()
-        })?;
-        let update_task: UpdateTask = serde_json::from_str(&body)
+        let update_task: UpdateTask = serde_json::from_str(&_request.get_body()?)
             .map_err(|e| HttpError::BadRequest(e.to_string()).into_http_response())?;
 
         self.task_service

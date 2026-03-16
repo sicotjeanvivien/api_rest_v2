@@ -1,5 +1,9 @@
 use crate::bootstrap::container::Container;
+use crate::bootstrap::router;
+use crate::interface::http::handlers::auth_handler::AuthHandler;
 use crate::interface::http::handlers::task_handler::TaskHandler;
+use crate::interface::http::request::HttpRequest;
+use crate::interface::http::router::route::{Handler, HandlerResult};
 use crate::interface::http::{
     request::HttpMethod,
     router::{route::Route, router::Router},
@@ -8,44 +12,68 @@ use crate::routes;
 use std::sync::Arc;
 
 pub async fn build_router(container: &Container) -> Arc<Router> {
-    let handler = Arc::new(TaskHandler::new(container.task_service.clone()));
+    let task_handler = Arc::new(TaskHandler::new(container.task_service.clone()));
+    let auth_handler = Arc::new(AuthHandler::new(container.auth_service.clone()));
+
     let router = routes![
+      POST "/auth/login" => {
+        let h = auth_handler.clone();
+        route_handler(move |req| {
+          let h = h.clone();
+          async move { h.login(req).await }
+        })
+      },
+      POST "/auth/register" => {
+        let h = auth_handler.clone();
+        route_handler(move |req| {
+          let h = h.clone();
+          async move { h.register(req).await }
+        })
+      },
       GET "/tasks/:id" => {
-        let handler = handler.clone();
-        move |req| Box::pin({
-            let handler = handler.clone();
-            async move {handler.get_task(req).await}
-          })
+        let h = task_handler.clone();
+        route_handler(move |req| {
+          let h = h.clone();
+          async move { h.get_task(req).await }
+        })
       },
       GET "/tasks" => {
-        let handler = handler.clone();
-        move |req| Box::pin({
-            let handler = handler.clone();
-            async move { handler.get_all_task(req).await }
-          })
+        let h = task_handler.clone();
+        route_handler(move |req| {
+          let h = h.clone();
+          async move { h.get_all_task(req).await }
+        })
       },
       POST "/tasks" => {
-        let handler = handler.clone();
-        move |req| Box::pin({
-            let handler = handler.clone();
-            async move {handler.create_task(req).await}
-          })
+        let h = task_handler.clone();
+        route_handler(move |req| {
+          let h = h.clone();
+          async move { h.create_task(req).await }
+        })
       },
       PATCH "/tasks" => {
-        let handler = handler.clone();
-        move |req| Box::pin({
-            let handler = handler.clone();
-            async move {handler.update_task(req).await}
-          })
+        let h = task_handler.clone();
+        route_handler(move |req| {
+          let h = h.clone();
+          async move { h.update_task(req).await }
+        })
       },
       DELETE "/tasks/:id" => {
-        let handler = handler.clone();
-        move |req| Box::pin({
-            let handler = handler.clone();
-            async move {handler.delete_task(req).await}
-          })
+        let h = task_handler.clone();
+        route_handler(move |req| {
+          let h = h.clone();
+          async move { h.delete_task(req).await }
+        })
       },
     ];
 
     Arc::new(router)
+}
+
+pub fn route_handler<F, Fut>(f: F) -> Box<Handler>
+where
+    F: Fn(HttpRequest) -> Fut + Send + Sync + 'static,
+    Fut: Future<Output = HandlerResult> + Send + 'static,
+{
+    Box::new(move |req| Box::pin(f(req)))
 }

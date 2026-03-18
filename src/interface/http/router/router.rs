@@ -1,11 +1,15 @@
-
 use std::collections::HashMap;
 
-use crate::interface::http::{
-    handlers::error_handler::ErrorHandler,
-    request::{HttpMethod, HttpRequest},
-    response::http_response::HttpResponse,
-    router::route::{Handler, Route},
+use tracing::{debug, info};
+
+use crate::{
+    application::security::jwt_service::JwtService,
+    interface::http::{
+        handlers::error_handler::ErrorHandler,
+        request::{HttpMethod, HttpRequest},
+        response::{http_response::HttpResponse, into_http_response::IntoHttpResponse},
+        router::route::{Handler, Route},
+    },
 };
 
 pub struct Router {
@@ -59,6 +63,20 @@ impl Router {
     }
 
     pub async fn handler(&self, mut request: HttpRequest) -> HttpResponse {
+        if !request.path.starts_with("/auth") {
+            let Some(auth_header) = request.headers.get("Authorization") else {
+                return ErrorHandler::unauthorized("Missing Authorization header");
+            };
+
+            let Some(token) = auth_header.strip_prefix("Bearer ") else {
+                return ErrorHandler::unauthorized("Invalid Authorization format");
+            };
+
+            if let Err(err) = JwtService::verify(token) {
+                info!("JWT verification failed: {:?}", err);
+                return ErrorHandler::unauthorized("Invalid token");
+            }
+        }
         match self.find_handler(&request.method, &request.path) {
             Some((handler, params)) => {
                 request.params.extend(params);

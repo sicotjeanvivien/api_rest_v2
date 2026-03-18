@@ -13,7 +13,7 @@ use std::sync::Arc;
 
 pub async fn build_router(container: &Container) -> Arc<Router> {
     let task_handler = Arc::new(TaskHandler::new(container.task_service.clone()));
-    let auth_handler = Arc::new(AuthHandler::new(container.auth_service.clone()));
+    let auth_handler = Arc::new(AuthHandler::new(container.credential_service.clone()));
 
     let router = routes![
       POST "/auth/login" => {

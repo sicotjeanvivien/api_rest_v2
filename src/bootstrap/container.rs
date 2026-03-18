@@ -19,7 +19,7 @@ pub struct Container {
     pub task_service: Arc<TaskService>,
     pub user_service: Arc<UserService>,
     pub credential_hasher: Arc<CredentialHasher>,
-    pub auth_service: Arc<CredentialService>,
+    pub credential_service: Arc<CredentialService>,
 }
 impl Container {
     pub async fn build() -> Self {
@@ -28,14 +28,14 @@ impl Container {
         let task_service: Arc<TaskService> = Self::init_task_service(pg_pool.clone()).await;
         let user_service: Arc<UserService> = Self::init_user_service(pg_pool.clone()).await;
         let credential_hasher: Arc<CredentialHasher> = Self::init_credential_hasher().await;
-        let auth_service: Arc<CredentialService> =
-            Self::init_auth_service(user_service.clone(), credential_hasher.clone()).await;
+        let credential_service: Arc<CredentialService> =
+            Self::init_credential_service(user_service.clone(), credential_hasher.clone()).await;
 
         Self {
             task_service: task_service,
             user_service: user_service,
             credential_hasher: credential_hasher,
-            auth_service: auth_service,
+            credential_service: credential_service,
         }
     }
 
@@ -69,7 +69,7 @@ impl Container {
         Arc::new(CredentialHasher::new())
     }
 
-    async fn init_auth_service(
+    async fn init_credential_service(
         user_service: Arc<UserService>,
         credential_hasher: Arc<CredentialHasher>,
     ) -> Arc<CredentialService> {

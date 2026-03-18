@@ -1,7 +1,7 @@
 use std::{collections::HashMap, sync::Arc};
 
 use crate::{
-    application::services::credential_service::CredentialService,
+    application::{security::jwt_service::JwtService, services::credential_service::CredentialService},
     domain::user::model::{User, UserAuth, UserRegister},
     interface::http::{
         error::http_error::HttpError,
@@ -33,10 +33,13 @@ impl AuthHandler {
             .await
             .map_err(|e| e.into_http_response())?;
 
+        let token = JwtService::generate(user.username()).map_err(|e| e.into_http_response())?;
+        let body = format!("{{\"token\": \"{token}\"}}", token = token);
+
         Ok(HttpResponse::new(
             StatusCode::OK,
             Self::build_header(),
-            None,
+            Some(body),
         ))
     }
 

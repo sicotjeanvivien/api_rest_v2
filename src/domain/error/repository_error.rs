@@ -11,17 +11,17 @@ pub enum RepositoryError {
     NotFound(String),
     #[error("Internal server Error: {0}")]
     Internal(String),
-    #[error("Invalid Credentials")]
-    InvalidCredentials,
+    #[error("Invalid Credentials : {0}")]
+    InvalidCredentials(String),
 }
 
 impl IntoHttpResponse for RepositoryError {
     fn into_http_response(self) -> HttpResponse {
         match self {
-          RepositoryError::BadRequest(msg)=> ErrorHandler::bad_request(&msg),
+            RepositoryError::BadRequest(msg) => ErrorHandler::bad_request(&msg),
             RepositoryError::NotFound(msg) => ErrorHandler::not_found(&msg),
             RepositoryError::Internal(msg) => ErrorHandler::internal_server_error(&msg),
-            RepositoryError::InvalidCredentials => ErrorHandler::unauthorized(""),
+            RepositoryError::InvalidCredentials(msg) => ErrorHandler::unauthorized(&msg),
         }
     }
 }

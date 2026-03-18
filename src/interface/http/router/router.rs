@@ -1,24 +1,28 @@
-use std::collections::HashMap;
+use std::{collections::HashMap, sync::Arc};
 
-use tracing::{debug, info};
+use tracing::info;
 
 use crate::{
     application::security::jwt_service::JwtService,
     interface::http::{
         handlers::error_handler::ErrorHandler,
         request::{HttpMethod, HttpRequest},
-        response::{http_response::HttpResponse, into_http_response::IntoHttpResponse},
+        response::http_response::HttpResponse,
         router::route::{Handler, Route},
     },
 };
 
 pub struct Router {
     routes: Vec<Route>,
+    jwt_service: Arc<JwtService>,
 }
 
 impl Router {
-    pub fn new(routes: Vec<Route>) -> Self {
-        Router { routes }
+    pub fn new(routes: Vec<Route>, jwt_service: Arc<JwtService>) -> Self {
+        Self {
+            routes,
+            jwt_service,
+        }
     }
 
     pub fn add_route(mut self, route: Route) -> Self {
@@ -72,7 +76,7 @@ impl Router {
                 return ErrorHandler::unauthorized("Invalid Authorization format");
             };
 
-            if let Err(err) = JwtService::verify(token) {
+            if let Err(err) = self.jwt_service.verify(token) {
                 info!("JWT verification failed: {:?}", err);
                 return ErrorHandler::unauthorized("Invalid token");
             }

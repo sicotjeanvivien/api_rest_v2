@@ -5,7 +5,6 @@ use crate::domain::{
         respository::UserRepository,
     },
 };
-use core::sync;
 use std::sync::Arc;
 
 pub struct UserService {

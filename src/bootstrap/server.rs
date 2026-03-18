@@ -1,5 +1,5 @@
 use crate::{
-    bootstrap::{self, container::{self, Container}},
+    bootstrap::{self, container::Container},
     interface::http::{
         parser::decode_request,
         response::{http_response::HttpResponse, into_http_response::IntoHttpResponse},
@@ -22,11 +22,13 @@ impl Server {
     pub async fn init() -> Self {
         dotenvy::dotenv().ok();
         tracing_subscriber::fmt::init();
-        
+
         let container = Container::build().await;
         let router = bootstrap::router::build_router(&container).await;
         let app_url = env::var("APP_URL").expect("APP_URL must be set in .env");
-        let tcp_listener: TcpListener = TcpListener::bind(app_url.clone()).await.expect("app_url is invalid ");
+        let tcp_listener: TcpListener = TcpListener::bind(app_url.clone())
+            .await
+            .expect("app_url is invalid ");
         info!("Server starting on {}", app_url);
         Server {
             router,
@@ -36,7 +38,11 @@ impl Server {
 
     pub async fn run(self) {
         loop {
-            let (stream, _addr): (TcpStream, _) = self.tcp_listener.accept().await.expect("couldn't get client");
+            let (stream, _addr): (TcpStream, _) = self
+                .tcp_listener
+                .accept()
+                .await
+                .expect("couldn't get client");
             let arc_router = Arc::clone(&self.router);
             tokio::spawn(async move {
                 handle_connection(stream, arc_router).await;

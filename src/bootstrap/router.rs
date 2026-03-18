@@ -1,5 +1,4 @@
 use crate::bootstrap::container::Container;
-use crate::bootstrap::router;
 use crate::interface::http::handlers::auth_handler::AuthHandler;
 use crate::interface::http::handlers::task_handler::TaskHandler;
 use crate::interface::http::request::HttpRequest;
@@ -13,9 +12,13 @@ use std::sync::Arc;
 
 pub async fn build_router(container: &Container) -> Arc<Router> {
     let task_handler = Arc::new(TaskHandler::new(container.task_service.clone()));
-    let auth_handler = Arc::new(AuthHandler::new(container.credential_service.clone()));
+    let auth_handler = Arc::new(AuthHandler::new(
+        container.credential_service.clone(),
+        container.jwt_service.clone(),
+    ));
 
     let router = routes![
+      container.jwt_service.clone(),
       POST "/auth/login" => {
         let h = auth_handler.clone();
         route_handler(move |req| {

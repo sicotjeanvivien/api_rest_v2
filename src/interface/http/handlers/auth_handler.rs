@@ -1,7 +1,9 @@
 use std::{collections::HashMap, sync::Arc};
 
 use crate::{
-    application::{security::jwt_service::JwtService, services::credential_service::CredentialService},
+    application::{
+        security::jwt_service::JwtService, services::credential_service::CredentialService,
+    },
     domain::user::model::{User, UserAuth, UserRegister},
     interface::http::{
         error::http_error::HttpError,
@@ -16,11 +18,15 @@ use crate::{
 #[derive(Clone)]
 pub struct AuthHandler {
     credential_service: Arc<CredentialService>,
+    jwt_service: Arc<JwtService>,
 }
 
 impl AuthHandler {
-    pub fn new(credential_service: Arc<CredentialService>) -> Self {
-        Self { credential_service }
+    pub fn new(credential_service: Arc<CredentialService>, jwt_service: Arc<JwtService>) -> Self {
+        Self {
+            credential_service,
+            jwt_service,
+        }
     }
 
     pub async fn login(&self, _request: HttpRequest) -> Result<HttpResponse, HttpResponse> {
@@ -33,7 +39,7 @@ impl AuthHandler {
             .await
             .map_err(|e| e.into_http_response())?;
 
-        let token = JwtService::generate(user.username()).map_err(|e| e.into_http_response())?;
+        let token = self.jwt_service.generate(user.username()).map_err(|e| e.into_http_response())?;
         let body = format!("{{\"token\": \"{token}\"}}", token = token);
 
         Ok(HttpResponse::new(

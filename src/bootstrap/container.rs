@@ -2,11 +2,10 @@ use sqlx::PgPool;
 
 use crate::{
     application::{
-        security::credential_hasher::{self, CredentialHasher},
+        security::{credential_hasher::CredentialHasher, jwt_service::JwtService},
         services::{
-            credential_service::{self, CredentialService},
-            task_service::{self, TaskService},
-            user_service::{self, UserService},
+            credential_service::CredentialService, task_service::TaskService,
+            user_service::UserService,
         },
     },
     infra::stores::{
@@ -20,6 +19,7 @@ pub struct Container {
     pub user_service: Arc<UserService>,
     pub credential_hasher: Arc<CredentialHasher>,
     pub credential_service: Arc<CredentialService>,
+    pub jwt_service: Arc<JwtService>,
 }
 impl Container {
     pub async fn build() -> Self {
@@ -30,12 +30,14 @@ impl Container {
         let credential_hasher: Arc<CredentialHasher> = Self::init_credential_hasher().await;
         let credential_service: Arc<CredentialService> =
             Self::init_credential_service(user_service.clone(), credential_hasher.clone()).await;
+        let jwt_service: Arc<JwtService> = Self::init_jwt_service();
 
         Self {
             task_service: task_service,
             user_service: user_service,
             credential_hasher: credential_hasher,
             credential_service: credential_service,
+            jwt_service: jwt_service,
         }
     }
 
@@ -74,5 +76,10 @@ impl Container {
         credential_hasher: Arc<CredentialHasher>,
     ) -> Arc<CredentialService> {
         Arc::new(CredentialService::new(user_service, credential_hasher).await)
+    }
+
+    fn init_jwt_service() -> Arc<JwtService> {
+        let secret = env::var("JWT_SECRET").expect("JWT_SECRET must be set in .env");
+        Arc::new(JwtService::new(secret))
     }
 }

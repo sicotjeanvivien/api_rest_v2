@@ -1,6 +1,5 @@
 use crate::interface::http::{
-    handlers::error_handler::ErrorHandler,
-    response::into_http_response::{self, IntoHttpResponse},
+    handlers::error_handler::ErrorHandler, response::into_http_response::IntoHttpResponse,
 };
 
 #[derive(Debug, thiserror::Error, PartialEq)]

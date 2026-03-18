@@ -1,14 +1,10 @@
 use crate::{
     application::{
-        security::credential_hasher::{self, CredentialHasher},
-        services::user_service::{self, UserService},
+        security::credential_hasher::CredentialHasher, services::user_service::UserService,
     },
     domain::{
         error::repository_error::RepositoryError,
-        user::{
-            model::{NewUser, User, UserAuth, UserRegister},
-            respository::UserRepository,
-        },
+        user::model::{NewUser, User, UserAuth, UserRegister},
     },
 };
 use std::sync::Arc;
@@ -48,6 +44,6 @@ impl CredentialService {
         self.credential_hasher
             .verify(user.hash(), &user_auth.password)?
             .then_some(user)
-            .ok_or(RepositoryError::InvalidCredentials)
+            .ok_or(RepositoryError::InvalidCredentials("".to_string()))
     }
 }

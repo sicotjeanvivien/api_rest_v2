@@ -1,7 +1,7 @@
 use crate::domain::{
     error::repository_error::RepositoryError,
     user::{
-        model::{NewUser, User, UserAuth, UserRegister},
+        model::{NewUser, User},
         respository::UserRepository,
     },
 };
@@ -36,7 +36,7 @@ impl UserRepository for PostgresUserStore {
     }
 
     async fn create(&self, new_user: NewUser) -> Result<(), RepositoryError> {
-        let row = sqlx::query!(
+        sqlx::query!(
             "INSERT INTO users (username, hash) VALUES ($1, $2) ;",
             new_user.username,
             new_user.hassh
@@ -49,7 +49,7 @@ impl UserRepository for PostgresUserStore {
             }
             _ => RepositoryError::Internal(e.to_string()),
         })?;
-        info!("New user creating");
+        info!("New user creating.");
         Ok(())
     }
 }

@@ -2,11 +2,8 @@ use std::collections::HashMap;
 use tracing::error;
 
 use crate::interface::http::{
-    error::{api_error::ApiError, http_error::HttpError},
-    response::{
-        http_response::HttpResponse,
-        status_code::{self, StatusCode},
-    },
+    error::api_error::ApiError,
+    response::{http_response::HttpResponse, status_code::StatusCode},
 };
 
 pub struct ErrorHandler {}

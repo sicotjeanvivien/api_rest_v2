@@ -39,7 +39,7 @@ impl UserRepository for PostgresUserStore {
         sqlx::query!(
             "INSERT INTO users (username, hash) VALUES ($1, $2) ;",
             new_user.username,
-            new_user.hassh
+            new_user.hash
         )
         .execute(&self.pg_pool)
         .await
@@ -51,5 +51,38 @@ impl UserRepository for PostgresUserStore {
         })?;
         info!("New user creating.");
         Ok(())
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use sqlx::PgPool;
+
+    #[sqlx::test(migrations = "./migrations")]
+    async fn test_create_and_get_by_user(pg_pool: PgPool) {
+        let store = PostgresUserStore::from_pool(pg_pool);
+        store.create(NewUser { username: "john_doe".to_string(), hash: "$argon2id$v=19$m=19456,t=2,p=1$dBPCpdhnbQNatTIOs9ilcA$USnB2zX124wzh0wSAOqIvpHIV9TWOmuK15OMnBrYYLc".to_string() } ).await.unwrap();
+        let user = store.get_by_username("john_doe").await.unwrap();
+        assert_eq!(user.username(), "john_doe");
+    }
+
+    #[sqlx::test(migrations = "./migrations")]
+    async fn test_get_by_username(pg_pool: PgPool) {
+        let store = PostgresUserStore::from_pool(pg_pool);
+
+        store
+            .create(NewUser {
+                username: "john_doe".to_string(),
+                hash: "hash123".to_string(),
+            })
+            .await
+            .unwrap();
+
+        let user = store.get_by_username("john_doe").await.unwrap();
+        assert_eq!(user.username(), "john_doe");
+
+        let err = store.get_by_username("unknown").await.unwrap_err();
+        assert!(matches!(err, RepositoryError::Internal(_)));
     }
 }

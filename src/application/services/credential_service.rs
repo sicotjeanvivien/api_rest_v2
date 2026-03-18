@@ -30,7 +30,7 @@ impl CredentialService {
 
         let new_user: NewUser = NewUser {
             username: user_register.username,
-            hassh: hash,
+            hash: hash,
         };
         self.user_service.create(new_user).await
     }

@@ -1,6 +1,7 @@
 use serde::Deserialize;
 use sqlx::types::chrono;
 
+#[derive(Debug)]
 pub struct User {
     id: i32,
     username: String,
@@ -38,7 +39,7 @@ impl User {
 
 pub struct NewUser {
     pub username: String,
-    pub hassh: String,
+    pub hash: String,
 }
 
 #[derive(Deserialize)]

@@ -136,3 +136,4 @@ fn parse_id(request: &HttpRequest) -> Result<i32, HttpResponse> {
             HttpError::BadRequest(e.to_string()).into_http_response()
         })
 }
+

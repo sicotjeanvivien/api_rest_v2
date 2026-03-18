@@ -1,7 +1,7 @@
 use crate::domain::{
     error::repository_error::RepositoryError,
     user::{
-        model::{User, UserAuth, UserRegister},
+        model::{NewUser, User, UserAuth, UserRegister},
         respository::UserRepository,
     },
 };
@@ -26,14 +26,30 @@ impl UserRepository for PostgresUserStore {
             .fetch_one(&self.pg_pool)
             .await
             .map_err(|e| match e {
-                sqlx::Error::RowNotFound => RepositoryError::NotFound(e.to_string()),
+                sqlx::Error::Database(db_error) => {
+                    RepositoryError::BadRequest(db_error.message().to_string())
+                }
                 _ => RepositoryError::Internal(e.to_string()),
             })?;
         info!(user_username = username, "Get task");
         Ok(User::new(row.id, row.username, row.hash, row.created_at))
     }
-    
-    async fn create(&self, user_register: UserRegister)-> Result<(), RepositoryError>{
-      todo!()
+
+    async fn create(&self, new_user: NewUser) -> Result<(), RepositoryError> {
+        let row = sqlx::query!(
+            "INSERT INTO users (username, hash) VALUES ($1, $2) ;",
+            new_user.username,
+            new_user.hassh
+        )
+        .execute(&self.pg_pool)
+        .await
+        .map_err(|e| match e {
+            sqlx::Error::Database(db_error) => {
+                RepositoryError::BadRequest(db_error.message().to_string())
+            }
+            _ => RepositoryError::Internal(e.to_string()),
+        })?;
+        info!("New user creating");
+        Ok(())
     }
 }

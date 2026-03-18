@@ -5,6 +5,8 @@ use crate::interface::http::{
 
 #[derive(Debug, thiserror::Error, PartialEq)]
 pub enum RepositoryError {
+    #[error("Bad Request: {0}")]
+    BadRequest(String),
     #[error("Data Not Found: {0}")]
     NotFound(String),
     #[error("Internal server Error: {0}")]
@@ -16,6 +18,7 @@ pub enum RepositoryError {
 impl IntoHttpResponse for RepositoryError {
     fn into_http_response(self) -> HttpResponse {
         match self {
+          RepositoryError::BadRequest(msg)=> ErrorHandler::bad_request(&msg),
             RepositoryError::NotFound(msg) => ErrorHandler::not_found(&msg),
             RepositoryError::Internal(msg) => ErrorHandler::internal_server_error(&msg),
             RepositoryError::InvalidCredentials => ErrorHandler::unauthorized(""),

@@ -20,6 +20,7 @@ dotenvy = "*"
 tracing = "*"
 tracing-subscriber = "*"
 argon2 = "*"
+jsonwebtoken = "*"
 
 [dev-dependencies]
 sqlx = { version = "*", features = [
@@ -27,5 +28,5 @@ sqlx = { version = "*", features = [
   "runtime-tokio",
   "macros",
   "migrate",
-  "chrono"
+  "chrono",
 ] }

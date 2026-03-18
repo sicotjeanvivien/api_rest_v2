@@ -6,19 +6,19 @@ use crate::{
     domain::{
         error::repository_error::RepositoryError,
         user::{
-            model::{User, UserAuth, UserRegister},
+            model::{NewUser, User, UserAuth, UserRegister},
             respository::UserRepository,
         },
     },
 };
 use std::sync::Arc;
 
-pub struct AuthService {
+pub struct CredentialService {
     user_service: Arc<UserService>,
     credential_hasher: Arc<CredentialHasher>,
 }
 
-impl AuthService {
+impl CredentialService {
     pub async fn new(
         user_service: Arc<UserService>,
         credential_hasher: Arc<CredentialHasher>,
@@ -29,9 +29,14 @@ impl AuthService {
         }
     }
 
-    pub async fn register(&self, user_register: UserRegister)-> Result<(), RepositoryError> {
+    pub async fn register(&self, user_register: UserRegister) -> Result<(), RepositoryError> {
         let hash = self.credential_hasher.hash(&user_register.password)?;
-        
+
+        let new_user: NewUser = NewUser {
+            username: user_register.username,
+            hassh: hash,
+        };
+        self.user_service.create(new_user).await
     }
 
     pub async fn login(&self, user_auth: UserAuth) -> Result<User, RepositoryError> {

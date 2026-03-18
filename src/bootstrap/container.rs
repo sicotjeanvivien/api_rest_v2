@@ -4,7 +4,7 @@ use crate::{
     application::{
         security::credential_hasher::{self, CredentialHasher},
         services::{
-            auth_service::{self, AuthService},
+            credential_service::{self, CredentialService},
             task_service::{self, TaskService},
             user_service::{self, UserService},
         },
@@ -19,7 +19,7 @@ pub struct Container {
     pub task_service: Arc<TaskService>,
     pub user_service: Arc<UserService>,
     pub credential_hasher: Arc<CredentialHasher>,
-    pub auth_service: Arc<AuthService>,
+    pub auth_service: Arc<CredentialService>,
 }
 impl Container {
     pub async fn build() -> Self {
@@ -28,7 +28,7 @@ impl Container {
         let task_service: Arc<TaskService> = Self::init_task_service(pg_pool.clone()).await;
         let user_service: Arc<UserService> = Self::init_user_service(pg_pool.clone()).await;
         let credential_hasher: Arc<CredentialHasher> = Self::init_credential_hasher().await;
-        let auth_service: Arc<AuthService> =
+        let auth_service: Arc<CredentialService> =
             Self::init_auth_service(user_service.clone(), credential_hasher.clone()).await;
 
         Self {
@@ -72,7 +72,7 @@ impl Container {
     async fn init_auth_service(
         user_service: Arc<UserService>,
         credential_hasher: Arc<CredentialHasher>,
-    ) -> Arc<AuthService> {
-        Arc::new(AuthService::new(user_service, credential_hasher).await)
+    ) -> Arc<CredentialService> {
+        Arc::new(CredentialService::new(user_service, credential_hasher).await)
     }
 }

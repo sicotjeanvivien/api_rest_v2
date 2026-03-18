@@ -72,7 +72,9 @@ impl TaskRepository for PostgresTaskStore {
         .execute(&self.pg_pool)
         .await
         .map_err(|e| match e {
-            sqlx::Error::RowNotFound => RepositoryError::NotFound(e.to_string()),
+            sqlx::Error::Database(db_error) => {
+                RepositoryError::BadRequest(db_error.message().to_string())
+            }
             _ => RepositoryError::Internal(e.to_string()),
         })?;
         info!("New task creating");

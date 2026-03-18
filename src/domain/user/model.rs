@@ -9,12 +9,7 @@ pub struct User {
 }
 
 impl User {
-    pub fn new(
-        id: i32,
-        username: String,
-        hash: String,
-        created_at: chrono::NaiveDateTime,
-    ) -> Self {
+    pub fn new(id: i32, username: String, hash: String, created_at: chrono::NaiveDateTime) -> Self {
         Self {
             id,
             username,
@@ -39,14 +34,19 @@ impl User {
     }
 }
 
-#[derive(Deserialize)]
-pub struct UserAuth{
-  pub username: String,
-  pub password: String
+pub struct NewUser {
+    pub username: String,
+    pub hassh: String,
 }
 
 #[derive(Deserialize)]
-pub struct UserRegister{
-  pub username: String,
-  pub password: String,
+pub struct UserAuth {
+    pub username: String,
+    pub password: String,
+}
+
+#[derive(Deserialize)]
+pub struct UserRegister {
+    pub username: String,
+    pub password: String,
 }

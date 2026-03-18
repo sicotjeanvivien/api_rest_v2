@@ -1,7 +1,7 @@
 use crate::domain::{
     error::repository_error::RepositoryError,
     user::{
-        model::{User, UserAuth, UserRegister},
+        model::{NewUser, User},
         respository::UserRepository,
     },
 };
@@ -20,7 +20,7 @@ impl UserService {
     pub async fn get_by_username(&self, username: &str) -> Result<User, RepositoryError> {
         self.repository.get_by_username(username).await
     }
-    pub async fn create(&self, user_register: UserRegister)->Result<(), RepositoryError> {
-        self.repository.create(user_register).await
+    pub async fn create(&self, new_user: NewUser)->Result<(), RepositoryError> {
+        self.repository.create(new_user).await
     }
 }

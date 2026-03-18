@@ -1,38 +1,56 @@
 use std::{collections::HashMap, sync::Arc};
 
 use crate::{
-    application::services::auth_service::AuthService,
-    domain::user::model::{User, UserAuth},
+    application::services::credential_service::CredentialService,
+    domain::user::model::{User, UserAuth, UserRegister},
     interface::http::{
-        error::http_error::HttpError, request::HttpRequest, response::{
+        error::http_error::HttpError,
+        request::HttpRequest,
+        response::{
             http_response::HttpResponse, into_http_response::IntoHttpResponse,
             status_code::StatusCode,
-        }
+        },
     },
 };
 
 #[derive(Clone)]
 pub struct AuthHandler {
-    auth_service: Arc<AuthService>,
+    credential_service: Arc<CredentialService>,
 }
 
 impl AuthHandler {
-    pub fn new(auth_service: Arc<AuthService>) -> Self {
-        Self { auth_service }
+    pub fn new(credential_service: Arc<CredentialService>) -> Self {
+        Self { credential_service }
     }
 
     pub async fn login(&self, _request: HttpRequest) -> Result<HttpResponse, HttpResponse> {
-      println!("login");
+        println!("login");
         let user_auth: UserAuth = serde_json::from_str(&_request.get_body()?)
             .map_err(|e| HttpError::BadRequest(e.to_string()).into_http_response())?;
         let user: User = self
-            .auth_service
+            .credential_service
             .login(user_auth)
             .await
             .map_err(|e| e.into_http_response())?;
 
         Ok(HttpResponse::new(
             StatusCode::OK,
+            Self::build_header(),
+            None,
+        ))
+    }
+
+    pub async fn register(&self, _request: HttpRequest) -> Result<HttpResponse, HttpResponse> {
+        let user_register: UserRegister = serde_json::from_str(&_request.get_body()?)
+            .map_err(|e| HttpError::BadRequest(e.to_string()).into_http_response())?;
+
+        self.credential_service
+            .register(user_register)
+            .await
+            .map_err(|e| e.into_http_response())?;
+
+        Ok(HttpResponse::new(
+            StatusCode::Created,
             Self::build_header(),
             None,
         ))

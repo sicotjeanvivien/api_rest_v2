@@ -18,6 +18,7 @@ impl User {
         }
     }
 
+    #[allow(dead_code)]
     pub fn id(&self) -> i32 {
         self.id
     }
@@ -29,6 +30,7 @@ impl User {
         &self.hash
     }
 
+    #[allow(dead_code)]
     pub fn created_at(&self) -> chrono::NaiveDateTime {
         self.created_at
     }

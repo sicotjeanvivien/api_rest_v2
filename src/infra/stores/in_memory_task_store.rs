@@ -1,20 +1,25 @@
 use async_trait::async_trait;
 
-use crate::domain::{error::repository_error::RepositoryError, task::{
+use crate::domain::{
+    error::repository_error::RepositoryError,
+    task::{
         model::{NewTask, Task, UpdateTask},
         repository::TaskRepository,
-    }};
+    },
+};
 use std::sync::{
     Arc, Mutex, MutexGuard,
     atomic::{AtomicI32, Ordering},
 };
 
+#[allow(dead_code)]
 pub struct InMemoryTaskStore {
     tasks: Arc<Mutex<Vec<Task>>>,
     next_id: AtomicI32,
 }
 
 impl InMemoryTaskStore {
+    #[allow(dead_code)]
     pub fn new() -> Self {
         Self {
             tasks: Arc::new(Mutex::new(vec![])),
@@ -22,10 +27,14 @@ impl InMemoryTaskStore {
         }
     }
 
+    #[allow(dead_code)]
     fn lock_tasks(&self) -> Result<MutexGuard<'_, Vec<Task>>, RepositoryError> {
-        self.tasks.lock().map_err(|e| RepositoryError::Internal(e.to_string()))
+        self.tasks
+            .lock()
+            .map_err(|e| RepositoryError::Internal(e.to_string()))
     }
 
+    #[allow(dead_code)]
     fn get_task(&self, id: i32) -> Result<Task, RepositoryError> {
         let tasks = self.lock_tasks()?;
         tasks
@@ -126,7 +135,10 @@ mod tests {
         let store = build_store().await;
 
         assert_eq!(store.get(1).await.unwrap().title(), "test create task 0");
-        assert_eq!(store.get(34).await.unwrap_err(), RepositoryError::NotFound("".to_string()));
+        assert_eq!(
+            store.get(34).await.unwrap_err(),
+            RepositoryError::NotFound("".to_string())
+        );
     }
 
     #[tokio::test]
@@ -134,7 +146,10 @@ mod tests {
         let store = build_store().await;
 
         assert_eq!(store.delete(1).await.unwrap(), ());
-        assert_eq!(store.get(1).await.unwrap_err(), RepositoryError::NotFound("".to_string()));
+        assert_eq!(
+            store.get(1).await.unwrap_err(),
+            RepositoryError::NotFound("".to_string())
+        );
         assert_eq!(
             store.delete(34).await.unwrap_err(),
             RepositoryError::NotFound("".to_string())

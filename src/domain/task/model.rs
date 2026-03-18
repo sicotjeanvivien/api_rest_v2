@@ -34,16 +34,19 @@ impl Task {
         self.done
     }
 
+    #[allow(dead_code)]
     pub fn set_title(&mut self, title: String) -> &Self {
         self.title = title;
         self
     }
 
+    #[allow(dead_code)]
     pub fn set_description(&mut self, description: Option<String>) -> &Self {
         self.description = description;
         self
     }
 
+    #[allow(dead_code)]
     pub fn set_done(&mut self, done: bool) -> &Self {
         self.done = done;
         self

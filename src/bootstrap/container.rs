@@ -14,6 +14,7 @@ use crate::{
 };
 use std::{env, sync::Arc};
 
+#[allow(dead_code)]
 pub struct Container {
     pub task_service: Arc<TaskService>,
     pub user_service: Arc<UserService>,

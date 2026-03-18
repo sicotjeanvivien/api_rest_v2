@@ -6,6 +6,7 @@ use crate::interface::http::{
 };
 
 #[derive(Debug)]
+#[allow(unused)]
 pub struct HttpRequest {
     pub method: HttpMethod,
     pub path: String,

@@ -1,5 +1,3 @@
-use std::env;
-
 use async_trait::async_trait;
 use sqlx::PgPool;
 use tracing::info;
@@ -17,15 +15,6 @@ pub struct PostgresTaskStore {
 }
 
 impl PostgresTaskStore {
-    pub async fn new() -> Self {
-        let database_url = env::var("DATABASE_URL").expect("DATABASE_URL must be set in .env");
-        Self {
-            pg_pool: PgPool::connect(&database_url)
-                .await
-                .expect("Failed to connect to PgPool"),
-        }
-    }
-
     pub fn from_pool(pg_pool: PgPool) -> Self {
         Self { pg_pool }
     }

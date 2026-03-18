@@ -3,6 +3,7 @@ use crate::interface::http::{
 };
 
 #[derive(Debug, thiserror::Error, PartialEq)]
+#[allow(dead_code)]
 pub enum SecurityError {
     #[error("Invalid Credential: {0}")]
     InvalidCredential(String),

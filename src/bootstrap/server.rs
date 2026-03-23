@@ -1,9 +1,7 @@
 use crate::{
     bootstrap::{self, container::Container},
     interface::http::{
-        parser::decode_request,
-        response::{http_response::HttpResponse, into_http_response::IntoHttpResponse},
-        router::router::Router,
+        parser::decode_request, response::http_response::HttpResponse, router::router::Router,
     },
 };
 use std::{env, sync::Arc};
@@ -54,7 +52,7 @@ impl Server {
 async fn handle_connection(mut stream: TcpStream, router: Arc<Router>) {
     let response: HttpResponse = match decode_request(&mut stream).await {
         Ok(request) => router.handler(request).await,
-        Err(e) => e.into_http_response(),
+        Err(e) => HttpResponse::from(e),
     };
     if let Err(e) = stream.write_all(response.to_string().as_bytes()).await {
         tracing::error!("Failed to write response: {}", e);

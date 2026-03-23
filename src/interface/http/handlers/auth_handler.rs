@@ -6,12 +6,8 @@ use crate::{
     },
     domain::user::model::{User, UserAuth, UserRegister},
     interface::http::{
-        error::http_error::HttpError,
         request::HttpRequest,
-        response::{
-            http_response::HttpResponse, into_http_response::IntoHttpResponse,
-            status_code::StatusCode,
-        },
+        response::{http_response::HttpResponse, status_code::StatusCode},
     },
 };
 
@@ -31,15 +27,18 @@ impl AuthHandler {
 
     pub async fn login(&self, _request: HttpRequest) -> Result<HttpResponse, HttpResponse> {
         println!("login");
-        let user_auth: UserAuth = serde_json::from_str(&_request.get_body()?)
-            .map_err(|e| HttpError::BadRequest(e.to_string()).into_http_response())?;
+        let user_auth: UserAuth =
+            serde_json::from_str(&_request.get_body()?).map_err(HttpResponse::from)?;
         let user: User = self
             .credential_service
             .login(user_auth)
             .await
-            .map_err(|e| e.into_http_response())?;
+            .map_err(HttpResponse::from)?;
 
-        let token = self.jwt_service.generate(user.username()).map_err(|e| e.into_http_response())?;
+        let token = self
+            .jwt_service
+            .generate(user.username())
+            .map_err(HttpResponse::from)?;
         let body = format!("{{\"token\": \"{token}\"}}", token = token);
 
         Ok(HttpResponse::new(
@@ -50,13 +49,13 @@ impl AuthHandler {
     }
 
     pub async fn register(&self, _request: HttpRequest) -> Result<HttpResponse, HttpResponse> {
-        let user_register: UserRegister = serde_json::from_str(&_request.get_body()?)
-            .map_err(|e| HttpError::BadRequest(e.to_string()).into_http_response())?;
+        let user_register: UserRegister =
+            serde_json::from_str(&_request.get_body()?).map_err(HttpResponse::from)?;
 
         self.credential_service
             .register(user_register)
             .await
-            .map_err(|e| e.into_http_response())?;
+            .map_err(HttpResponse::from)?;
 
         Ok(HttpResponse::new(
             StatusCode::Created,

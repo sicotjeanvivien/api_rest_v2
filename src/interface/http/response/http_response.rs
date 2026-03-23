@@ -1,5 +1,12 @@
-use crate::interface::http::response::status_code::StatusCode;
-use std::collections::HashMap;
+use crate::{
+    application::security::error::security_error::SecurityError,
+    domain::error::repository_error::RepositoryError,
+    interface::http::{
+        error::http_error::HttpError, handlers::error_handler::ErrorHandler,
+        response::status_code::StatusCode,
+    },
+};
+use std::{collections::HashMap, num::ParseIntError};
 
 pub struct HttpResponse {
     status_code: StatusCode,
@@ -52,5 +59,51 @@ impl HttpResponse {
         if let Some(v) = &self.body {
             response.push_str(v);
         }
+    }
+}
+
+impl From<RepositoryError> for HttpResponse {
+    fn from(err: RepositoryError) -> Self {
+        match err {
+            RepositoryError::BadRequest(msg) => ErrorHandler::bad_request(&msg),
+            RepositoryError::NotFound(msg) => ErrorHandler::not_found(&msg),
+            RepositoryError::Internal(msg) => ErrorHandler::internal_server_error(&msg),
+            RepositoryError::InvalidCredentials(msg) => ErrorHandler::unauthorized(&msg),
+        }
+    }
+}
+
+impl From<HttpError> for HttpResponse {
+    fn from(err: HttpError) -> Self {
+        match err {
+            HttpError::BadRequest(msg) => ErrorHandler::bad_request(&msg),
+            HttpError::MethodNotFound(msg) => ErrorHandler::method_not_found(&msg),
+            HttpError::ParamNotFound(msg) => ErrorHandler::bad_request(&msg),
+            HttpError::InternalServerError(msg) => ErrorHandler::internal_server_error(&msg),
+        }
+    }
+}
+
+impl From<SecurityError> for HttpResponse {
+    fn from(err: SecurityError) -> Self {
+        match err {
+            SecurityError::InvalidCredential(msg) => ErrorHandler::unauthorized(&msg),
+            SecurityError::TokenCreationFailed(msg) => ErrorHandler::internal_server_error(&msg),
+            SecurityError::InvalidToken(msg) => ErrorHandler::unauthorized(&msg),
+            SecurityError::MissingJwtSecret(msg) => ErrorHandler::internal_server_error(&msg),
+            SecurityError::TokenExpired(msg) => ErrorHandler::unauthorized(&msg),
+        }
+    }
+}
+
+impl From<serde_json::Error> for HttpResponse {
+    fn from(err: serde_json::Error) -> Self {
+        ErrorHandler::bad_request(&err.to_string())
+    }
+}
+
+impl From<ParseIntError> for HttpResponse {
+    fn from(err: ParseIntError) -> Self {
+        ErrorHandler::bad_request(&err.to_string())
     }
 }

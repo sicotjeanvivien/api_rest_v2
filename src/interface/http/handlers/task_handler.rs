@@ -5,12 +5,8 @@ use crate::{
     domain::task::model::{NewTask, UpdateTask},
     interface::http::{
         dto::response::task_response::TaskResponse,
-        error::http_error::HttpError,
         request::HttpRequest,
-        response::{
-            http_response::HttpResponse, into_http_response::IntoHttpResponse,
-            status_code::StatusCode,
-        },
+        response::{http_response::HttpResponse, status_code::StatusCode},
     },
 };
 
@@ -31,11 +27,10 @@ impl TaskHandler {
             .task_service
             .get(id)
             .await
-            .map_err(|e| e.into_http_response())?;
+            .map_err(HttpResponse::from)?;
 
         let task_response = TaskResponse::from(task);
-        let body = serde_json::to_string(&task_response)
-            .map_err(|e| HttpError::InternalServerError(e.to_string()).into_http_response())?;
+        let body = serde_json::to_string(&task_response).map_err(HttpResponse::from)?;
 
         Ok(HttpResponse::new(
             StatusCode::OK,
@@ -49,12 +44,11 @@ impl TaskHandler {
             .task_service
             .get_all()
             .await
-            .map_err(|e| e.into_http_response())?;
+            .map_err(HttpResponse::from)?;
 
         let response_tasks: Vec<TaskResponse> = tasks.into_iter().map(TaskResponse::from).collect();
 
-        let body = serde_json::to_string(&response_tasks)
-            .map_err(|e| HttpError::InternalServerError(e.to_string()).into_http_response())?;
+        let body = serde_json::to_string(&response_tasks).map_err(HttpResponse::from)?;
 
         Ok(HttpResponse::new(
             StatusCode::OK,
@@ -64,13 +58,13 @@ impl TaskHandler {
     }
 
     pub async fn create_task(&self, _request: HttpRequest) -> Result<HttpResponse, HttpResponse> {
-        let new_task: NewTask = serde_json::from_str(&_request.get_body()?)
-            .map_err(|e| HttpError::BadRequest(e.to_string()).into_http_response())?;
+        let new_task: NewTask =
+            serde_json::from_str(&_request.get_body()?).map_err(HttpResponse::from)?;
 
         self.task_service
             .create(new_task)
             .await
-            .map_err(|e| e.into_http_response())?;
+            .map_err(HttpResponse::from)?;
 
         Ok(HttpResponse::new(
             StatusCode::Created,
@@ -80,13 +74,13 @@ impl TaskHandler {
     }
 
     pub async fn update_task(&self, _request: HttpRequest) -> Result<HttpResponse, HttpResponse> {
-        let update_task: UpdateTask = serde_json::from_str(&_request.get_body()?)
-            .map_err(|e| HttpError::BadRequest(e.to_string()).into_http_response())?;
+        let update_task: UpdateTask =
+            serde_json::from_str(&_request.get_body()?).map_err(HttpResponse::from)?;
 
         self.task_service
             .update(update_task)
             .await
-            .map_err(|e| e.into_http_response())?;
+            .map_err(HttpResponse::from)?;
         Ok(HttpResponse::new(
             StatusCode::Accepted,
             Self::build_header(),
@@ -99,7 +93,7 @@ impl TaskHandler {
         self.task_service
             .delete(id)
             .await
-            .map_err(|e| e.into_http_response())?;
+            .map_err(HttpResponse::from)?;
 
         Ok(HttpResponse::new(
             StatusCode::Accepted,
@@ -130,10 +124,7 @@ impl TaskHandler {
 fn parse_id(request: &HttpRequest) -> Result<i32, HttpResponse> {
     request
         .get_value_by_key("id".to_string())
-        .map_err(|e| e.into_http_response())?
+        .map_err(HttpResponse::from)?
         .parse()
-        .map_err(|e: std::num::ParseIntError| {
-            HttpError::BadRequest(e.to_string()).into_http_response()
-        })
+        .map_err(HttpResponse::from)
 }
-

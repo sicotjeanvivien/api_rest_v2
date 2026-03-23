@@ -1,9 +1,6 @@
 use std::collections::HashMap;
 
-use crate::interface::http::{
-    error::http_error::HttpError,
-    response::{http_response::HttpResponse, into_http_response::IntoHttpResponse},
-};
+use crate::interface::http::{error::http_error::HttpError, response::http_response::HttpResponse};
 
 #[derive(Debug)]
 #[allow(unused)]
@@ -48,9 +45,9 @@ impl HttpRequest {
     }
 
     pub fn get_body(&self) -> Result<String, HttpResponse> {
-        self.body.clone().ok_or_else(|| {
-            HttpError::BadRequest("body is not found".to_string()).into_http_response()
-        })
+        self.body
+            .clone()
+            .ok_or_else(|| HttpError::BadRequest("body is not found".to_string()).into())
     }
 }
 

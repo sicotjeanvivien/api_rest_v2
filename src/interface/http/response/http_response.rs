@@ -6,7 +6,7 @@ use crate::{
         response::status_code::StatusCode,
     },
 };
-use std::{collections::HashMap, num::ParseIntError};
+use std::{collections::HashMap, fmt::Display, num::ParseIntError};
 
 pub struct HttpResponse {
     status_code: StatusCode,
@@ -25,18 +25,6 @@ impl HttpResponse {
             headers,
             body,
         }
-    }
-
-    pub fn to_string(&self) -> String {
-        let mut response = String::new();
-        let body_len = match &self.body {
-            Some(b) => b.len(),
-            None => 0,
-        };
-        self.generate_status_line(&mut response);
-        self.generate_headers(&mut response, body_len);
-        self.generate_body(&mut response);
-        response
     }
 
     fn generate_status_line(&self, response: &mut String) {
@@ -59,6 +47,20 @@ impl HttpResponse {
         if let Some(v) = &self.body {
             response.push_str(v);
         }
+    }
+}
+
+impl Display for HttpResponse {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let mut response: String = String::new();
+        let body_len = match &self.body {
+            Some(b) => b.len(),
+            None => 0,
+        };
+        self.generate_status_line(&mut response);
+        self.generate_headers(&mut response, body_len);
+        self.generate_body(&mut response);
+        write!(f, "{}", response)
     }
 }
 

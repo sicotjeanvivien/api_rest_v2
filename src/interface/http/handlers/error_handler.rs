@@ -10,7 +10,7 @@ pub struct ErrorHandler {}
 
 impl ErrorHandler {
     pub fn internal_server_error(message: &str) -> HttpResponse {
-        error!(code = StatusCode::InternalServerError.to_u16(), message);
+        error!(code = StatusCode::InternalServerError.to_string(), message);
         HttpResponse::new(
             StatusCode::InternalServerError,
             Self::build_header(),
@@ -19,7 +19,7 @@ impl ErrorHandler {
     }
 
     pub fn not_found(message: &str) -> HttpResponse {
-        error!(code = StatusCode::NotFound.to_u16(), message);
+        error!(code = StatusCode::NotFound.to_string(), message);
         HttpResponse::new(
             StatusCode::NotFound,
             Self::build_header(),
@@ -28,7 +28,7 @@ impl ErrorHandler {
     }
 
     pub fn bad_request(message: &str) -> HttpResponse {
-        error!(code = StatusCode::BadRequest.to_u16(), message);
+        error!(code = StatusCode::BadRequest.to_string(), message);
         HttpResponse::new(
             StatusCode::BadRequest,
             Self::build_header(),
@@ -38,7 +38,7 @@ impl ErrorHandler {
 
     #[allow(dead_code)]
     pub fn unprocessable_entity(message: &str) -> HttpResponse {
-        error!(code = StatusCode::UnprocessableEntity.to_u16(), message);
+        error!(code = StatusCode::UnprocessableEntity.to_string(), message);
         HttpResponse::new(
             StatusCode::UnprocessableEntity,
             Self::build_header(),
@@ -47,7 +47,7 @@ impl ErrorHandler {
     }
 
     pub fn method_not_found(message: &str) -> HttpResponse {
-        error!(code = StatusCode::UnprocessableEntity.to_u16(), message);
+        error!(code = StatusCode::UnprocessableEntity.to_string(), message);
         HttpResponse::new(
             StatusCode::UnprocessableEntity,
             Self::build_header(),
@@ -56,7 +56,7 @@ impl ErrorHandler {
     }
 
     pub fn unauthorized(message: &str) -> HttpResponse {
-        error!(code = StatusCode::Unauthorized.to_u16(), message);
+        error!(code = StatusCode::Unauthorized.to_string(), message);
         HttpResponse::new(
             StatusCode::Unauthorized,
             Self::build_header(),

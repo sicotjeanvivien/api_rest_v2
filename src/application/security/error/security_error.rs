@@ -11,4 +11,6 @@ pub enum SecurityError {
     MissingJwtSecret(String),
     #[error("TokenExpired: {0}")]
     TokenExpired(String),
+    #[error("JWT error: {0}")]
+    Jwt(#[from] jsonwebtoken::errors::Error),
 }

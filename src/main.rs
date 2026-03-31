@@ -7,7 +7,8 @@ mod infra;
 mod interface;
 
 #[tokio::main]
-async fn main() {
-    let server: Server = Server::init().await;
+async fn main() -> anyhow::Result<()> {
+    let server: Server = Server::init().await?;
     server.run().await;
+    Ok(())
 }

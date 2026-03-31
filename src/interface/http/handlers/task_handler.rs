@@ -2,7 +2,7 @@ use std::{collections::HashMap, sync::Arc};
 
 use crate::{
     application::services::task_service::TaskService,
-    domain::task::model::{NewTask, UpdateTask},
+    domain::task::model::{NewTask, Task, UpdateTask},
     interface::http::{
         dto::response::task_response::TaskResponse,
         request::HttpRequest,
@@ -127,4 +127,41 @@ fn parse_id(request: &HttpRequest) -> Result<i32, HttpResponse> {
         .map_err(HttpResponse::from)?
         .parse()
         .map_err(HttpResponse::from)
+}
+
+#[allow(unused)]
+fn parse_by_key(key: &str, request: &HttpRequest) -> Result<usize, HttpResponse> {
+    request
+        .get_value_by_key(key.to_string())
+        .map_err(HttpResponse::from)?
+        .parse()
+        .map_err(HttpResponse::from)
+}
+
+#[allow(unused)]
+async fn sum_ids(task_service: TaskService, _request: HttpRequest) -> Result<i32, HttpResponse> {
+    let sum_task = task_service
+        .get_all()
+        .await
+        .map_err(HttpResponse::from)?
+        .into_iter()
+        .filter(|t| !t.done())
+        .fold(0, |acc, x| acc + x.id());
+
+    Ok(sum_task)
+}
+
+#[allow(unused)]
+fn parse_ids(ids: Vec<&str>) -> Result<Vec<i32>, HttpResponse> {
+    ids.iter()
+        .map(|id| id.parse::<i32>().map_err(HttpResponse::from))
+        .collect()
+}
+
+#[allow(unused)]
+fn filter_task_not_done(tasks: Vec<Task>) -> Vec<String> {
+    tasks
+        .into_iter()
+        .filter_map(|t| t.description().map(|t| t.to_string()))
+        .collect()
 }

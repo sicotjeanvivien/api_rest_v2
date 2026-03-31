@@ -94,6 +94,7 @@ impl From<SecurityError> for HttpResponse {
             SecurityError::InvalidToken(msg) => ErrorHandler::unauthorized(&msg),
             SecurityError::MissingJwtSecret(msg) => ErrorHandler::internal_server_error(&msg),
             SecurityError::TokenExpired(msg) => ErrorHandler::unauthorized(&msg),
+            SecurityError::Jwt(err) => ErrorHandler::unauthorized(&err.to_string()),
         }
     }
 }

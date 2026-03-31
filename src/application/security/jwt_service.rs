@@ -21,18 +21,14 @@ impl JwtService {
             sub: username.to_string(),
             exp: (Utc::now() + chrono::Duration::hours(24)).timestamp() as usize,
         };
-
         let header: Header = Header::default();
-
-        jsonwebtoken::encode(&header, &claims, &self.encoding_key)
-            .map_err(|e| SecurityError::InvalidCredential(e.to_string()))
+        let token = jsonwebtoken::encode(&header, &claims, &self.encoding_key)?;
+        Ok(token)
     }
 
     pub fn verify(&self, token: &str) -> Result<Claims, SecurityError> {
-        let validation = &Validation::new(Algorithm::HS256);
-
-        jsonwebtoken::decode(token, &self.decoding_key, validation)
-            .map(|token| token.claims)
-            .map_err(|e| SecurityError::InvalidCredential(e.to_string()))
+        let validation = Validation::new(Algorithm::HS256);
+        let token_data = jsonwebtoken::decode(token, &self.decoding_key, &validation)?;
+        Ok(token_data.claims)
     }
 }

@@ -1,8 +1,8 @@
-use crate::domain::task::model::Task;
+use crate::domain::Task;
 use serde::Serialize;
 
 #[derive(Serialize)]
-pub struct TaskResponse {
+pub(crate)  struct TaskResponse {
     id: i32,
     title: String,
     description: Option<String>,

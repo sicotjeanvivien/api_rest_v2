@@ -1,7 +1,7 @@
 use std::fmt::Display;
 
 #[allow(dead_code)]
-pub enum StatusCode {
+pub(crate)  enum StatusCode {
     Continue,
     SwitchingProtocol,
     Processing,
@@ -66,7 +66,7 @@ pub enum StatusCode {
 }
 
 impl StatusCode {
-    pub fn to_u16(&self) -> u16 {
+    pub(crate) fn to_u16(&self) -> u16 {
         match self {
             Self::Continue => 100,
             Self::SwitchingProtocol => 101,
@@ -132,7 +132,7 @@ impl StatusCode {
         }
     }
 
-    pub fn to_text(&self) -> &str {
+    pub(crate) fn to_text(&self) -> &str {
         match self {
             Self::Continue => "Continue",
             Self::SwitchingProtocol => "Switching Protocol",

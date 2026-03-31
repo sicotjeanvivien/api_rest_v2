@@ -1,15 +1,15 @@
-use crate::domain::error::repository_error::RepositoryError;
+use crate::domain::RepositoryError;
 use argon2::{
     Algorithm, Argon2, Params, PasswordHash, PasswordHasher, PasswordVerifier, Version,
     password_hash::{SaltString, rand_core::OsRng},
 };
 
-pub struct CredentialHasher {
+pub(crate)  struct CredentialHasher {
     argon2: Argon2<'static>,
 }
 
 impl CredentialHasher {
-    pub fn new() -> Self {
+    pub(crate)  fn new() -> Self {
         Self {
             argon2: Argon2::new(
                 Algorithm::Argon2id,
@@ -19,7 +19,7 @@ impl CredentialHasher {
         }
     }
 
-    pub fn hash(&self, password: &str) -> Result<String, RepositoryError> {
+    pub(crate)  fn hash(&self, password: &str) -> Result<String, RepositoryError> {
         let salt = SaltString::generate(&mut OsRng);
 
         self.argon2
@@ -28,7 +28,7 @@ impl CredentialHasher {
             .map_err(|e| RepositoryError::Internal(e.to_string()))
     }
 
-    pub fn verify(&self, hash: &str, password: &str) -> Result<bool, RepositoryError> {
+    pub(crate)  fn verify(&self, hash: &str, password: &str) -> Result<bool, RepositoryError> {
         let parsed_hash = PasswordHash::new(hash)
             .map_err(|e| RepositoryError::InvalidCredentials(e.to_string()))?;
         self.argon2

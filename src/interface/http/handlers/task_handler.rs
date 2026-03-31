@@ -1,26 +1,25 @@
 use std::{collections::HashMap, sync::Arc};
 
 use crate::{
-    application::services::task_service::TaskService,
-    domain::task::model::{NewTask, Task, UpdateTask},
-    interface::http::{
-        dto::response::task_response::TaskResponse,
-        request::HttpRequest,
-        response::{http_response::HttpResponse, status_code::StatusCode},
-    },
+    application::TaskService,
+    domain::{NewTask, Task, UpdateTask},
+    interface::{HttpRequest, HttpResponse, StatusCode, TaskResponse},
 };
 
 #[derive(Clone)]
-pub struct TaskHandler {
+pub(crate) struct TaskHandler {
     task_service: Arc<TaskService>,
 }
 
 impl TaskHandler {
-    pub fn new(task_service: Arc<TaskService>) -> Self {
+    pub(crate) fn new(task_service: Arc<TaskService>) -> Self {
         Self { task_service }
     }
 
-    pub async fn get_task(&self, _request: HttpRequest) -> Result<HttpResponse, HttpResponse> {
+    pub(crate) async fn get_task(
+        &self,
+        _request: HttpRequest,
+    ) -> Result<HttpResponse, HttpResponse> {
         let id = parse_id(&_request)?;
 
         let task = self
@@ -39,7 +38,10 @@ impl TaskHandler {
         ))
     }
 
-    pub async fn get_all_task(&self, _request: HttpRequest) -> Result<HttpResponse, HttpResponse> {
+    pub(crate) async fn get_all_task(
+        &self,
+        _request: HttpRequest,
+    ) -> Result<HttpResponse, HttpResponse> {
         let tasks = self
             .task_service
             .get_all()
@@ -57,7 +59,10 @@ impl TaskHandler {
         ))
     }
 
-    pub async fn create_task(&self, _request: HttpRequest) -> Result<HttpResponse, HttpResponse> {
+    pub(crate) async fn create_task(
+        &self,
+        _request: HttpRequest,
+    ) -> Result<HttpResponse, HttpResponse> {
         let new_task: NewTask =
             serde_json::from_str(&_request.get_body()?).map_err(HttpResponse::from)?;
 
@@ -73,7 +78,10 @@ impl TaskHandler {
         ))
     }
 
-    pub async fn update_task(&self, _request: HttpRequest) -> Result<HttpResponse, HttpResponse> {
+    pub(crate) async fn update_task(
+        &self,
+        _request: HttpRequest,
+    ) -> Result<HttpResponse, HttpResponse> {
         let update_task: UpdateTask =
             serde_json::from_str(&_request.get_body()?).map_err(HttpResponse::from)?;
 
@@ -88,7 +96,10 @@ impl TaskHandler {
         ))
     }
 
-    pub async fn delete_task(&self, _request: HttpRequest) -> Result<HttpResponse, HttpResponse> {
+    pub(crate) async fn delete_task(
+        &self,
+        _request: HttpRequest,
+    ) -> Result<HttpResponse, HttpResponse> {
         let id = parse_id(&_request)?;
         self.task_service
             .delete(id)

@@ -1,31 +1,29 @@
 use std::{collections::HashMap, sync::Arc};
 
 use crate::{
-    application::{
-        security::jwt_service::JwtService, services::credential_service::CredentialService,
-    },
-    domain::user::model::{User, UserAuth, UserRegister},
-    interface::http::{
-        request::HttpRequest,
-        response::{http_response::HttpResponse, status_code::StatusCode},
-    },
+    application::{CredentialService, JwtService},
+    domain::{User, UserAuth, UserRegister},
+    interface::{HttpRequest, HttpResponse, StatusCode},
 };
 
 #[derive(Clone)]
-pub struct AuthHandler {
+pub(crate) struct AuthHandler {
     credential_service: Arc<CredentialService>,
     jwt_service: Arc<JwtService>,
 }
 
 impl AuthHandler {
-    pub fn new(credential_service: Arc<CredentialService>, jwt_service: Arc<JwtService>) -> Self {
+    pub(crate) fn new(
+        credential_service: Arc<CredentialService>,
+        jwt_service: Arc<JwtService>,
+    ) -> Self {
         Self {
             credential_service,
             jwt_service,
         }
     }
 
-    pub async fn login(&self, _request: HttpRequest) -> Result<HttpResponse, HttpResponse> {
+    pub(crate) async fn login(&self, _request: HttpRequest) -> Result<HttpResponse, HttpResponse> {
         println!("login");
         let user_auth: UserAuth =
             serde_json::from_str(&_request.get_body()?).map_err(HttpResponse::from)?;
@@ -48,7 +46,10 @@ impl AuthHandler {
         ))
     }
 
-    pub async fn register(&self, _request: HttpRequest) -> Result<HttpResponse, HttpResponse> {
+    pub(crate) async fn register(
+        &self,
+        _request: HttpRequest,
+    ) -> Result<HttpResponse, HttpResponse> {
         let user_register: UserRegister =
             serde_json::from_str(&_request.get_body()?).map_err(HttpResponse::from)?;
 

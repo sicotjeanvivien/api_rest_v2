@@ -1,29 +1,21 @@
 use sqlx::PgPool;
 
 use crate::{
-    application::{
-        security::{credential_hasher::CredentialHasher, jwt_service::JwtService},
-        services::{
-            credential_service::CredentialService, task_service::TaskService,
-            user_service::UserService,
-        },
-    },
-    infra::stores::{
-        postgres_task_store::PostgresTaskStore, postgres_user_store::PostgresUserStore,
-    },
+    application::{CredentialHasher, CredentialService, JwtService, TaskService, UserService},
+    infra::{PostgresTaskStore, PostgresUserStore},
 };
 use std::{env, sync::Arc};
 
 #[allow(dead_code)]
-pub struct Container {
-    pub task_service: Arc<TaskService>,
-    pub user_service: Arc<UserService>,
-    pub credential_hasher: Arc<CredentialHasher>,
-    pub credential_service: Arc<CredentialService>,
-    pub jwt_service: Arc<JwtService>,
+pub(crate)  struct Container {
+    pub(crate)  task_service: Arc<TaskService>,
+    pub(crate)  user_service: Arc<UserService>,
+    pub(crate)  credential_hasher: Arc<CredentialHasher>,
+    pub(crate)  credential_service: Arc<CredentialService>,
+    pub(crate)  jwt_service: Arc<JwtService>,
 }
 impl Container {
-    pub async fn build() -> Self {
+    pub(crate)  async fn build() -> Self {
         let pg_pool: sqlx::Pool<sqlx::Postgres> = Self::init_db().await;
 
         let task_service: Arc<TaskService> = Self::init_task_service(pg_pool.clone()).await;

@@ -1,6 +1,6 @@
 #[derive(Debug, thiserror::Error, PartialEq)]
 #[allow(dead_code)]
-pub enum HttpError {
+pub(crate) enum HttpError {
     #[error("Method Not Found: {0}")]
     MethodNotFound(String),
     #[error("Param Not Found: {0}")]

@@ -1,5 +1,5 @@
 #[derive(Debug, thiserror::Error, PartialEq)]
-pub enum RepositoryError {
+pub(crate)  enum RepositoryError {
     #[error("Bad Request: {0}")]
     BadRequest(String),
     #[error("Data Not Found: {0}")]

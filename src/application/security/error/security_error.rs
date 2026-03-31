@@ -1,6 +1,6 @@
 #[derive(Debug, thiserror::Error, PartialEq)]
 #[allow(dead_code)]
-pub enum SecurityError {
+pub(crate)  enum SecurityError {
     #[error("Invalid Credential: {0}")]
     InvalidCredential(String),
     #[error("Token CreationFailed: {0}")]

@@ -1,20 +1,20 @@
 use std::collections::HashMap;
 
-use crate::interface::http::{error::http_error::HttpError, response::http_response::HttpResponse};
+use crate::interface::{HttpError, HttpResponse, HttpMethod};
 
 #[derive(Debug)]
 #[allow(unused)]
-pub struct HttpRequest {
-    pub method: HttpMethod,
-    pub path: String,
-    pub params: HashMap<String, String>,
-    pub http_version: String,
-    pub headers: HashMap<String, String>,
-    pub body: Option<String>,
+pub(crate)  struct HttpRequest {
+    pub(crate)  method: HttpMethod,
+    pub(crate)  path: String,
+    pub(crate)  params: HashMap<String, String>,
+    pub(crate)  http_version: String,
+    pub(crate)  headers: HashMap<String, String>,
+    pub(crate)  body: Option<String>,
 }
 
 impl HttpRequest {
-    pub fn new(
+    pub(crate)  fn new(
         method: HttpMethod,
         path: String,
         params: HashMap<String, String>,
@@ -32,7 +32,7 @@ impl HttpRequest {
         }
     }
 
-    pub fn get_value_by_key(&self, key: String) -> Result<&String, HttpError> {
+    pub(crate)  fn get_value_by_key(&self, key: String) -> Result<&String, HttpError> {
         if self.params.contains_key(&key) {
             if let Some(x) = self.params.get(&key) {
                 return Ok(x);
@@ -44,22 +44,9 @@ impl HttpRequest {
         )))
     }
 
-    pub fn get_body(&self) -> Result<String, HttpResponse> {
+    pub(crate)  fn get_body(&self) -> Result<String, HttpResponse> {
         self.body
             .clone()
             .ok_or_else(|| HttpError::BadRequest("body is not found".to_string()).into())
     }
-}
-
-#[derive(PartialEq, Debug)]
-pub enum HttpMethod {
-    GET,
-    POST,
-    PUT,
-    PATCH,
-    HEAD,
-    DELETE,
-    CONNECT,
-    OPTIONS,
-    TRACE,
 }

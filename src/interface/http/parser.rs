@@ -2,10 +2,7 @@ use std::collections::HashMap;
 
 use tokio::{io::AsyncReadExt, net::TcpStream};
 
-use crate::interface::http::{
-    error::http_error::HttpError,
-    request::{HttpMethod, HttpRequest},
-};
+use crate::interface::{HttpError, HttpMethod, HttpRequest};
 
 pub async fn decode_request(stream: &mut TcpStream) -> Result<HttpRequest, HttpError> {
     let mut buffer = [0; 2048];

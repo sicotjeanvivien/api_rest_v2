@@ -1,26 +1,20 @@
 use async_trait::async_trait;
 
-use crate::domain::{
-    error::repository_error::RepositoryError,
-    task::{
-        model::{NewTask, Task, UpdateTask},
-        repository::TaskRepository,
-    },
-};
+use crate::domain::{NewTask, RepositoryError, Task, TaskRepository, UpdateTask};
 use std::sync::{
     Arc, Mutex, MutexGuard,
     atomic::{AtomicI32, Ordering},
 };
 
 #[allow(dead_code)]
-pub struct InMemoryTaskStore {
+pub(crate)  struct InMemoryTaskStore {
     tasks: Arc<Mutex<Vec<Task>>>,
     next_id: AtomicI32,
 }
 
 impl InMemoryTaskStore {
     #[allow(dead_code)]
-    pub fn new() -> Self {
+    pub(crate)  fn new() -> Self {
         Self {
             tasks: Arc::new(Mutex::new(vec![])),
             next_id: AtomicI32::new(1),
@@ -97,7 +91,7 @@ impl TaskRepository for InMemoryTaskStore {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::domain::task::model::NewTask;
+    use crate::domain::NewTask;
 
     #[tokio::test]
     async fn test_create_and_get_all() {

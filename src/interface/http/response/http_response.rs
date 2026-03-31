@@ -1,21 +1,18 @@
 use crate::{
-    application::security::error::security_error::SecurityError,
-    domain::error::repository_error::RepositoryError,
-    interface::http::{
-        error::http_error::HttpError, handlers::error_handler::ErrorHandler,
-        response::status_code::StatusCode,
-    },
+    application::SecurityError,
+    domain::RepositoryError,
+    interface::{ErrorHandler, HttpError, StatusCode},
 };
 use std::{collections::HashMap, fmt::Display, num::ParseIntError};
 
-pub struct HttpResponse {
+pub(crate)  struct HttpResponse {
     status_code: StatusCode,
     headers: HashMap<String, String>,
     body: Option<String>,
 }
 
 impl HttpResponse {
-    pub fn new(
+    pub(crate)  fn new(
         status_code: StatusCode,
         headers: HashMap<String, String>,
         body: Option<String>,

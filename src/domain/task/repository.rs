@@ -1,11 +1,9 @@
-use crate::domain::{
-    error::repository_error::RepositoryError,
-    task::model::{NewTask, Task, UpdateTask},
-};
 use async_trait::async_trait;
 
+use crate::domain::{NewTask, RepositoryError, Task, UpdateTask};
+
 #[async_trait]
-pub trait TaskRepository {
+pub(crate) trait TaskRepository {
     async fn get(&self, id: i32) -> Result<Task, RepositoryError>;
     async fn get_all(&self) -> Result<Vec<Task>, RepositoryError>;
     async fn create(&self, new_task: NewTask) -> Result<(), RepositoryError>;

@@ -1,20 +1,14 @@
-use crate::domain::{
-    error::repository_error::RepositoryError,
-    user::{
-        model::{NewUser, User},
-        respository::UserRepository,
-    },
-};
+use crate::domain::{NewUser, RepositoryError, User, UserRepository};
 use async_trait::async_trait;
 use sqlx::PgPool;
 use tracing::info;
 
-pub struct PostgresUserStore {
+pub(crate)  struct PostgresUserStore {
     pg_pool: PgPool,
 }
 
 impl PostgresUserStore {
-    pub fn from_pool(pg_pool: PgPool) -> Self {
+    pub(crate)  fn from_pool(pg_pool: PgPool) -> Self {
         Self { pg_pool }
     }
 }

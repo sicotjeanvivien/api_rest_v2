@@ -1,4 +1,4 @@
-use crate::bootstrap::server::Server;
+use crate::bootstrap::Server;
 
 mod application;
 mod bootstrap;

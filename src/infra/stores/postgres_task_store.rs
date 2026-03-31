@@ -2,20 +2,14 @@ use async_trait::async_trait;
 use sqlx::PgPool;
 use tracing::info;
 
-use crate::domain::{
-    error::repository_error::RepositoryError,
-    task::{
-        model::{NewTask, Task, UpdateTask},
-        repository::TaskRepository,
-    },
-};
+use crate::domain::{NewTask, RepositoryError, Task, TaskRepository, UpdateTask};
 
-pub struct PostgresTaskStore {
+pub(crate)  struct PostgresTaskStore {
     pg_pool: PgPool,
 }
 
 impl PostgresTaskStore {
-    pub fn from_pool(pg_pool: PgPool) -> Self {
+    pub(crate)  fn from_pool(pg_pool: PgPool) -> Self {
         Self { pg_pool }
     }
 }
@@ -109,7 +103,7 @@ impl TaskRepository for PostgresTaskStore {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::domain::task::model::NewTask;
+    use crate::domain::NewTask;
     use sqlx::PgPool;
 
     #[sqlx::test(migrations = "./migrations")]

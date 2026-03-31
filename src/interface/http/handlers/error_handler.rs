@@ -1,15 +1,12 @@
 use std::collections::HashMap;
 use tracing::error;
 
-use crate::interface::http::{
-    error::api_error::ApiError,
-    response::{http_response::HttpResponse, status_code::StatusCode},
-};
+use crate::interface::{ApiError, HttpResponse, StatusCode};
 
-pub struct ErrorHandler {}
+pub(crate) struct ErrorHandler {}
 
 impl ErrorHandler {
-    pub fn internal_server_error(message: &str) -> HttpResponse {
+    pub(crate) fn internal_server_error(message: &str) -> HttpResponse {
         error!(code = StatusCode::InternalServerError.to_string(), message);
         HttpResponse::new(
             StatusCode::InternalServerError,
@@ -18,7 +15,7 @@ impl ErrorHandler {
         )
     }
 
-    pub fn not_found(message: &str) -> HttpResponse {
+    pub(crate) fn not_found(message: &str) -> HttpResponse {
         error!(code = StatusCode::NotFound.to_string(), message);
         HttpResponse::new(
             StatusCode::NotFound,
@@ -27,7 +24,7 @@ impl ErrorHandler {
         )
     }
 
-    pub fn bad_request(message: &str) -> HttpResponse {
+    pub(crate) fn bad_request(message: &str) -> HttpResponse {
         error!(code = StatusCode::BadRequest.to_string(), message);
         HttpResponse::new(
             StatusCode::BadRequest,
@@ -37,7 +34,7 @@ impl ErrorHandler {
     }
 
     #[allow(dead_code)]
-    pub fn unprocessable_entity(message: &str) -> HttpResponse {
+    pub(crate) fn unprocessable_entity(message: &str) -> HttpResponse {
         error!(code = StatusCode::UnprocessableEntity.to_string(), message);
         HttpResponse::new(
             StatusCode::UnprocessableEntity,
@@ -46,7 +43,7 @@ impl ErrorHandler {
         )
     }
 
-    pub fn method_not_found(message: &str) -> HttpResponse {
+    pub(crate) fn method_not_found(message: &str) -> HttpResponse {
         error!(code = StatusCode::UnprocessableEntity.to_string(), message);
         HttpResponse::new(
             StatusCode::UnprocessableEntity,
@@ -55,7 +52,7 @@ impl ErrorHandler {
         )
     }
 
-    pub fn unauthorized(message: &str) -> HttpResponse {
+    pub(crate) fn unauthorized(message: &str) -> HttpResponse {
         error!(code = StatusCode::Unauthorized.to_string(), message);
         HttpResponse::new(
             StatusCode::Unauthorized,

@@ -3,34 +3,29 @@ use std::{collections::HashMap, sync::Arc};
 use tracing::info;
 
 use crate::{
-    application::security::jwt_service::JwtService,
-    interface::http::{
-        handlers::error_handler::ErrorHandler,
-        request::{HttpMethod, HttpRequest},
-        response::http_response::HttpResponse,
-        router::route::{Handler, Route},
-    },
+    application::JwtService,
+    interface::{ErrorHandler, Handler, HttpMethod, HttpRequest, HttpResponse, Route},
 };
 
-pub struct Router {
+pub(crate)  struct Router {
     routes: Vec<Route>,
     jwt_service: Arc<JwtService>,
 }
 
 impl Router {
-    pub fn new(routes: Vec<Route>, jwt_service: Arc<JwtService>) -> Self {
+    pub(crate)  fn new(routes: Vec<Route>, jwt_service: Arc<JwtService>) -> Self {
         Self {
             routes,
             jwt_service,
         }
     }
 
-    pub fn add_route(mut self, route: Route) -> Self {
+    pub(crate)  fn add_route(mut self, route: Route) -> Self {
         self.routes.push(route);
         self
     }
 
-    pub fn find_handler(
+    pub(crate)  fn find_handler(
         &self,
         method: &HttpMethod,
         path: &str,
@@ -66,7 +61,7 @@ impl Router {
         None
     }
 
-    pub async fn handler(&self, mut request: HttpRequest) -> HttpResponse {
+    pub(crate)  async fn handler(&self, mut request: HttpRequest) -> HttpResponse {
         if !request.path.starts_with("/auth") {
             let Some(auth_header) = request.headers.get("Authorization") else {
                 return ErrorHandler::unauthorized("Missing Authorization header");

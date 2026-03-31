@@ -1,16 +1,11 @@
-use crate::bootstrap::container::Container;
-use crate::interface::http::handlers::auth_handler::AuthHandler;
-use crate::interface::http::handlers::task_handler::TaskHandler;
-use crate::interface::http::request::HttpRequest;
-use crate::interface::http::router::route::{Handler, HandlerResult};
-use crate::interface::http::{
-    request::HttpMethod,
-    router::{route::Route, router::Router},
+use crate::bootstrap::Container;
+use crate::interface::{
+    AuthHandler, Handler, HandlerResult, HttpMethod, HttpRequest, Route, Router, TaskHandler,
 };
 use crate::routes;
 use std::sync::Arc;
 
-pub async fn build_router(container: &Container) -> Arc<Router> {
+pub(crate) async fn build_router(container: &Container) -> Arc<Router> {
     let task_handler = Arc::new(TaskHandler::new(container.task_service.clone()));
     let auth_handler = Arc::new(AuthHandler::new(
         container.credential_service.clone(),
@@ -73,7 +68,7 @@ pub async fn build_router(container: &Container) -> Arc<Router> {
     Arc::new(router)
 }
 
-pub fn route_handler<F, Fut>(f: F) -> Box<Handler>
+fn route_handler<F, Fut>(f: F) -> Box<Handler>
 where
     F: Fn(HttpRequest) -> Fut + Send + Sync + 'static,
     Fut: Future<Output = HandlerResult> + Send + 'static,

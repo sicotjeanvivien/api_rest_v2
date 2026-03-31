@@ -1,8 +1,6 @@
 use crate::{
-    bootstrap::{self, container::Container},
-    interface::http::{
-        parser::decode_request, response::http_response::HttpResponse, router::router::Router,
-    },
+    bootstrap::{self, Container},
+    interface::{HttpResponse, Router, decode_request},
 };
 use anyhow::Context;
 use std::{env, sync::Arc};
@@ -12,18 +10,18 @@ use tokio::{
 };
 use tracing::info;
 
-pub struct Server {
-    pub router: Arc<Router>,
-    pub tcp_listener: TcpListener,
+pub(crate) struct Server {
+    pub(crate) router: Arc<Router>,
+    pub(crate) tcp_listener: TcpListener,
 }
 
 impl Server {
-    pub async fn init() -> anyhow::Result<Self> {
+    pub(crate) async fn init() -> anyhow::Result<Self> {
         dotenvy::dotenv().ok();
         tracing_subscriber::fmt::init();
 
         let container = Container::build().await;
-        let router = bootstrap::router::build_router(&container).await;
+        let router = bootstrap::build_router(&container).await;
         let app_url = env::var("APP_URL").context("APP_URL must be set in .env")?;
         let tcp_listener = TcpListener::bind(app_url.clone())
             .await
@@ -35,7 +33,7 @@ impl Server {
         })
     }
 
-    pub async fn run(self) {
+    pub(crate) async fn run(self) {
         loop {
             let (stream, _addr): (TcpStream, _) = self
                 .tcp_listener

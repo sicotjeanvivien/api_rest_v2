@@ -2,7 +2,7 @@ use serde::Deserialize;
 use sqlx::types::chrono;
 
 #[derive(Debug)]
-pub struct User {
+pub(crate) struct User {
     id: i32,
     username: String,
     hash: String,
@@ -10,7 +10,7 @@ pub struct User {
 }
 
 impl User {
-    pub fn new(id: i32, username: String, hash: String, created_at: chrono::NaiveDateTime) -> Self {
+    pub(crate) fn new(id: i32, username: String, hash: String, created_at: chrono::NaiveDateTime) -> Self {
         Self {
             id,
             username,
@@ -20,36 +20,36 @@ impl User {
     }
 
     #[allow(dead_code)]
-    pub fn id(&self) -> i32 {
+    pub(crate) fn id(&self) -> i32 {
         self.id
     }
 
-    pub fn username(&self) -> &str {
+    pub(crate) fn username(&self) -> &str {
         &self.username
     }
-    pub fn hash(&self) -> &str {
+    pub(crate) fn hash(&self) -> &str {
         &self.hash
     }
 
     #[allow(dead_code)]
-    pub fn created_at(&self) -> chrono::NaiveDateTime {
+    pub(crate) fn created_at(&self) -> chrono::NaiveDateTime {
         self.created_at
     }
 }
 
-pub struct NewUser {
-    pub username: String,
-    pub hash: String,
+pub(crate) struct NewUser {
+    pub(crate) username: String,
+    pub(crate) hash: String,
 }
 
 #[derive(Deserialize)]
-pub struct UserAuth {
-    pub username: String,
-    pub password: String,
+pub(crate) struct UserAuth {
+    pub(crate) username: String,
+    pub(crate) password: String,
 }
 
 #[derive(Deserialize)]
-pub struct UserRegister {
-    pub username: String,
-    pub password: String,
+pub(crate) struct UserRegister {
+    pub(crate) username: String,
+    pub(crate) password: String,
 }

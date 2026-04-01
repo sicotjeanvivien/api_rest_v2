@@ -61,6 +61,15 @@ impl ErrorHandler {
         )
     }
 
+    pub fn timeout(message: &str) -> HttpResponse {
+        error!(code = StatusCode::RequestTimeout.to_string(), message);
+        HttpResponse::new(
+            StatusCode::RequestTimeout,
+            Self::build_header(),
+            Self::build_body(StatusCode::RequestTimeout, message),
+        )
+    }
+
     fn build_header() -> HashMap<String, String> {
         let mut headers = HashMap::new();
         headers.insert("Content-Type".to_string(), "application/json".to_string());

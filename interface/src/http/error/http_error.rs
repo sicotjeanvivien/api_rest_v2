@@ -9,4 +9,6 @@ pub enum HttpError {
     BadRequest(String),
     #[error("Internal server error: {0}")]
     InternalServerError(String),
+    #[error("Request timed out")]
+    Timeout,
 }

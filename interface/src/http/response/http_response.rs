@@ -77,6 +77,7 @@ impl From<HttpError> for HttpResponse {
             HttpError::MethodNotFound(msg) => ErrorHandler::method_not_found(&msg),
             HttpError::ParamNotFound(msg) => ErrorHandler::bad_request(&msg),
             HttpError::InternalServerError(msg) => ErrorHandler::internal_server_error(&msg),
+            HttpError::Timeout => ErrorHandler::timeout(&err.to_string()),
         }
     }
 }

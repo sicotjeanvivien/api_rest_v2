@@ -22,11 +22,3 @@ tracing-subscriber = "*"
 argon2 = "*"
 jsonwebtoken = "8"
 
-[workspace.dev-dependencies]
-sqlx = { version = "*", features = [
-  "postgres",
-  "runtime-tokio",
-  "macros",
-  "migrate",
-  "chrono",
-] }

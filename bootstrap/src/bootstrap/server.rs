@@ -1,12 +1,12 @@
 use crate::bootstrap::{self, Container};
 use anyhow::Context;
 use interface::{HttpResponse, Router, decode_request};
-use std::{env, sync::Arc};
+use std::{env, io::Result, net::SocketAddr, sync::Arc};
 use tokio::{
     io::AsyncWriteExt,
     net::{TcpListener, TcpStream},
 };
-use tracing::info;
+use tracing::{error, info};
 
 pub(crate) struct Server {
     pub(crate) router: Arc<Router>,
@@ -33,16 +33,30 @@ impl Server {
 
     pub(crate) async fn run(self) {
         loop {
-            let (stream, _addr): (TcpStream, _) = self
-                .tcp_listener
-                .accept()
-                .await
-                .expect("couldn't get client");
-            let arc_router = Arc::clone(&self.router);
-            tokio::spawn(async move {
-                handle_connection(stream, arc_router).await;
-            });
+            tokio::select! {
+                res = self.tcp_listener.accept() => {
+                    if let Err(e) = self.handle_accept(res).await {
+                        error!(error = %e, "Accept error");
+                    }
+                }
+                _ = tokio::signal::ctrl_c() => {
+                    info!("Shutdown signal received — stopping server");
+                    break;
+                }
+            }
         }
+        info!("Server stopped");
+    }
+
+    async fn handle_accept(&self, res: Result<(TcpStream, SocketAddr)>) -> Result<()> {
+        let (stream, _) = res?;
+        let router = Arc::clone(&self.router);
+
+        tokio::spawn(async move {
+            handle_connection(stream, router).await;
+        });
+
+        Ok(())
     }
 }
 

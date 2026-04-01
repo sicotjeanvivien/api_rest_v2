@@ -4,15 +4,24 @@ use tracing::info;
 
 use domain::{NewTask, RepositoryError, Task, TaskRepository, UpdateTask};
 
-pub  struct PostgresTaskStore {
+pub struct PostgresTaskStore {
     pg_pool: PgPool,
 }
 
 impl PostgresTaskStore {
-    pub  fn from_pool(pg_pool: PgPool) -> Self {
+    const BDD_URL: &str = "postgres://app:azerty@127.0.0.1:5432/api_rest";
+
+    pub async fn new() -> Self {
+        Self {
+            pg_pool: PgPool::connect(Self::BDD_URL).await.unwrap(),
+        }
+    }
+
+    pub fn from_pool(pg_pool: PgPool) -> Self {
         Self { pg_pool }
     }
 }
+
 #[async_trait]
 impl TaskRepository for PostgresTaskStore {
     async fn get(&self, id: i32) -> Result<Task, RepositoryError> {

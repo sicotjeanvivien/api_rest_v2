@@ -21,4 +21,13 @@ tracing = "*"
 tracing-subscriber = "*"
 argon2 = "*"
 jsonwebtoken = "8"
+criterion = { version = "0.5", features = ["html_reports", "async_tokio"] }
 
+[workspace.dev-dependencies]
+sqlx = { version = "*", features = [
+  "postgres",
+  "runtime-tokio",
+  "macros",
+  "migrate",
+  "chrono",
+] }

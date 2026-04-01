@@ -1,0 +1,16 @@
+[package]
+name = "bootstrap"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+domain = { path = "../domain" }
+application = { path = "../application" }
+infra = { path = "../infra" }
+interface = { path = "../interface" }
+tokio = { workspace = true }
+anyhow = { workspace = true }
+dotenvy = { workspace = true }
+tracing-subscriber = { workspace = true }
+tracing = { workspace = true }
+sqlx = { workspace = true }

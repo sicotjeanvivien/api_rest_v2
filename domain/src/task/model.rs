@@ -1,6 +1,6 @@
 use serde::Deserialize;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct Task {
     id: i32,
     title: String,
@@ -65,4 +65,26 @@ pub struct UpdateTask {
     pub title: Option<String>,
     pub description: Option<String>,
     pub done: Option<bool>,
+}
+
+#[cfg(test)]
+mod tests {
+    use proptest::proptest;
+
+    use super::*;
+
+    proptest! {
+
+    #[test]
+    fn title_est_toujours_preserve(title in ".*") {
+           let task = Task::new(1, title.clone(), None, false);
+           assert_eq!(task.title(), title);
+       }
+
+    #[test]
+      fn done_est_toujours_preserve(done: bool){
+          let task = Task::new(1, "title".to_string(), None, done.clone());
+           assert_eq!(task.done(), done);
+      }
+    }
 }

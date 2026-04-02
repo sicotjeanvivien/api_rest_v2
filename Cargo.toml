@@ -1,5 +1,5 @@
 [workspace]
-members = ["domain", "application", "infra", "interface", "bootstrap"]
+members = ["domain", "application", "infra", "interface", "bootstrap", "derive_macros"]
 resolver = "2"
 
 [workspace.dependencies]
@@ -13,6 +13,7 @@ sqlx = { version = "*", features = [
   "postgres",
   "runtime-tokio",
   "macros",
+  "migrate",
   "chrono",
 ] }
 async-trait = "*"
@@ -22,12 +23,5 @@ tracing-subscriber = "*"
 argon2 = "*"
 jsonwebtoken = "8"
 criterion = { version = "0.5", features = ["html_reports", "async_tokio"] }
-
-[workspace.dev-dependencies]
-sqlx = { version = "*", features = [
-  "postgres",
-  "runtime-tokio",
-  "macros",
-  "migrate",
-  "chrono",
-] }
+mockall = "0.13"
+proptest = "1"

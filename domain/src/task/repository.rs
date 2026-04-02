@@ -1,7 +1,9 @@
 use async_trait::async_trait;
+use mockall::automock;
 
 use crate::{NewTask, RepositoryError, Task, UpdateTask};
 
+#[automock]
 #[async_trait]
 pub trait TaskRepository {
     async fn get(&self, id: i32) -> Result<Task, RepositoryError>;

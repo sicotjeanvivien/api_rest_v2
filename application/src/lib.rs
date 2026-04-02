@@ -9,3 +9,6 @@ pub use security::Claims;
 pub use security::CredentialHasher;
 pub use security::JwtService;
 pub use security::SecurityError;
+
+#[cfg(test)]
+pub use domain::task::repository::MockTaskRepository;

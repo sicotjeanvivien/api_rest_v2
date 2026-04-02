@@ -9,3 +9,7 @@ serde = { workspace = true }
 async-trait = { workspace = true }
 thiserror = { workspace = true }
 chrono = { workspace = true }
+mockall = { workspace = true }
+
+[dev-dependencies]
+proptest = { workspace = true }

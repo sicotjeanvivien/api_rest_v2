@@ -48,14 +48,16 @@ fn bench_deleted(c: &mut Criterion) {
     let store = rt.block_on(async { PostgresTaskStore::new().await });
 
     c.bench_function("create", |b| {
-        b.to_async(&rt).iter(|| async {
-            store
-                .delete(20)
-                .await
-                .unwrap()
-        });
+        b.to_async(&rt)
+            .iter(|| async { store.delete(20).await.unwrap() });
     });
 }
 
-criterion_group!(benches, bench_create, bench_get_all, bench_get_by_id, bench_deleted);
+criterion_group!(
+    benches,
+    bench_create,
+    bench_get_all,
+    bench_get_by_id,
+    bench_deleted
+);
 criterion_main!(benches);

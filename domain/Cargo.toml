@@ -10,6 +10,7 @@ async-trait = { workspace = true }
 thiserror = { workspace = true }
 chrono = { workspace = true }
 mockall = { workspace = true }
+derive_macros = { path = "../derive_macros" }
 
 [dev-dependencies]
 proptest = { workspace = true }

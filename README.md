@@ -186,16 +186,6 @@ Permet de :
 
 ---
 
-## 📌 Roadmap
-
-* [ ] Observabilité (tracing, metrics)
-* [ ] Dockerisation
-* [ ] Rate limiting
-* [ ] CI/CD
-* [ ] Documentation OpenAPI
-
----
-
 ## 🤝 Contributing
 
 Les contributions sont les bienvenues :

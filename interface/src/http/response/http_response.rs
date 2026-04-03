@@ -78,6 +78,9 @@ impl From<HttpError> for HttpResponse {
             HttpError::ParamNotFound(msg) => ErrorHandler::bad_request(&msg),
             HttpError::InternalServerError(msg) => ErrorHandler::internal_server_error(&msg),
             HttpError::Timeout => ErrorHandler::timeout(&err.to_string()),
+            HttpError::InvalidEncoding => ErrorHandler::bad_request(&err.to_string()),
+            HttpError::MalformedRequest => ErrorHandler::bad_request(&err.to_string()),
+            HttpError::IoError => ErrorHandler::internal_server_error(&err.to_string()),
         }
     }
 }

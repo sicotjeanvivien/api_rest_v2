@@ -7,8 +7,14 @@ pub enum HttpError {
     ParamNotFound(String),
     #[error("Bad Request: {0}")]
     BadRequest(String),
-    #[error("Internal server error: {0}")]
+    #[error("Internal Server Error: {0}")]
     InternalServerError(String),
-    #[error("Request timed out")]
+    #[error("Request Timed Out")]
     Timeout,
+    #[error("Invalid Encoding")]
+    InvalidEncoding,
+    #[error("Malformed Request")]
+    MalformedRequest,
+    #[error("Io Error")]
+    IoError,
 }

@@ -61,7 +61,7 @@ impl Router {
 
     pub async fn handler(&self, mut request: HttpRequest) -> HttpResponse {
         if !request.path.starts_with("/auth") {
-            let Some(auth_header) = request.headers.get("Authorization") else {
+            let Some(auth_header) = request.headers.get("authorization") else {
                 return ErrorHandler::unauthorized("Missing Authorization header");
             };
 
